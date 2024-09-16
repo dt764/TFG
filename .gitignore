@@ -1,0 +1,5 @@
+# Ignorar todos los directorios __pycache__
+__pycache__/
+
+# Ignorar archivos .pyc en cualquier lugar del proyecto
+*.pyc
