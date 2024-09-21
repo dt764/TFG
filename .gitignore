@@ -5,3 +5,5 @@ __pycache__/
 *.pyc
 
 src/UI/assets/
+detections_img
+detections.csv
