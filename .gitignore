@@ -3,3 +3,5 @@ __pycache__/
 
 # Ignorar archivos .pyc en cualquier lugar del proyecto
 *.pyc
+
+src/UI/assets/
