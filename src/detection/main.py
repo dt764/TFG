@@ -8,44 +8,58 @@ from logger import Logger
 import cv2
 
 def main():
-
     script_dir = pathlib.Path(__file__).parent.absolute()
-    model_path = os.path.join(script_dir, '../models/saved_model/license-detector_edgetpu.tflite')
-    label_file = os.path.join(script_dir, '../models/saved_model/labels.txt')
-    csv_file = os.path.join(script_dir, '../detections.csv')
-    img_dir = os.path.join(script_dir, '../detections_img')
+    model_path = script_dir / '../../models/saved_model/license-detector_edgetpu.tflite'
+    csv_file = script_dir / '../../detections.csv'
+    img_dir = script_dir / '../../detections_img'
     min_detection_confidence = 0.85
     min_ocr_confidence = 0.85
 
-    detector = LicensePlateDetector(model_path, min_detection_confidence)
+    # Variables para evitar loggear duplicados
+    last_detected_plate = None
+    last_detection_time = None
+    time_threshold = 5  # Umbral de tiempo en segundos
+
+    detector = LicensePlateDetector(str(model_path), min_detection_confidence)
     webcam = WebcamCapture()
     ocr_processor = OCRProcessor()
     logger = Logger(img_dir, csv_file)
 
-    while True:
-        frame = webcam.get_frame()
-        roi, ymin, xmin, ymax, xmax = detector.detect_license_plate(frame)
-        cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
+    try:
+        while True:
+            frame = webcam.get_frame()
+            roi, ymin, xmin, ymax, xmax = detector.detect_license_plate(frame)
+            cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
 
-        if roi is not None:
+            if roi is not None:
+                detected_plate = ocr_processor.apply_ocr(roi)
 
-            detected_plate = ocr_processor.apply_ocr(roi)
+                if detected_plate:
+                    print(f"Detected Plate: {detected_plate}")
+                    
+                    current_time = datetime.datetime.now()
 
-            if detected_plate:
+                    # Evitar guardar si es la misma matrícula detectada recientemente
+                    if (detected_plate != last_detected_plate or 
+                        last_detection_time is None or 
+                        (current_time - last_detection_time).total_seconds() > time_threshold):
 
-                timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-                image_path = os.path.join(img_dir, f'{timestamp}.jpg') 
+                        print(f"Logging {detected_plate} into csv")
 
-                logger.save_image(frame, image_path)
-                logger.save_detection_to_csv(timestamp, detected_plate, image_path)
-
-                print(f"Detected Plate: {detected_plate}")
-
-        cv2.imshow('Frame', frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-    webcam.release()
+                        # Actualizar última detección
+                        last_detected_plate = detected_plate
+                        last_detection_time = current_time
+                        
+                        logger.save_detection_to_csv(detected_plate, current_time, frame)
+                    else:
+                        print(f"Not Logging {detected_plate} because its too early to do it again")
+                        
+            cv2.imshow('Frame', frame)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+    finally:
+        webcam.release()
+        cv2.destroyAllWindows()
 
 if __name__ == "__main__":
     main()
