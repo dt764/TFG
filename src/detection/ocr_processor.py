@@ -11,12 +11,17 @@ class OCRProcessor:
         return pattern.match(plate) is not None
 
     def apply_ocr(self, roi):
-       ocr_results = self.reader.readtext(roi, allowlist='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')
-       # Procesar resultados del OCR
-       for detection in ocr_results:
-         print(f"OCR Result for license: {detection[1]}")
-         detected_plate = detection[1].strip().replace(" ", "").upper()
+        ocr_results = self.reader.readtext(roi, allowlist='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ')
+        
+        # Ordenar los resultados por las coordenadas horizontales (xmin)
+        ocr_results_sorted = sorted(ocr_results, key=lambda x: x[0][0])
 
-         if self.is_valid_plate(detected_plate):
-            return detected_plate
+        # Concatenar todos los resultados de OCR detectados en una cadena
+        concatenated_plate = ''.join([detection[1].strip().replace(" ", "").upper() for detection in ocr_results_sorted])
+        print(f"OCR Concatenated Result: {concatenated_plate}")
 
+        # Validar si el texto concatenado es una matrícula válida
+        if self.is_valid_plate(concatenated_plate):
+            return concatenated_plate
+        
+        return None
