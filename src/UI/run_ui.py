@@ -56,8 +56,8 @@ class MyApp(QMainWindow):
         self.ui.setupUi(self)
 
         # Conectar los botones para cambiar de página en el QStackedWidget
-        self.ui.Historial_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(0))
-        self.ui.Camara_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(1))
+        self.ui.Historial_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(1))
+        self.ui.Camara_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(0))
         
         script_dir = pathlib.Path(__file__).parent.absolute()
         csv_file = os.path.join(script_dir, '../../detections.csv')
