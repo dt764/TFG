@@ -29,6 +29,7 @@ class LicensePlateDetector:
         xmin = 0
         xmax = 0
         ymax = 0
+        confidence = 0.0  # Nueva variable para la confianza
         
         imH, imW, _ = frame.shape
 
@@ -50,5 +51,6 @@ class LicensePlateDetector:
                 ymax = int(min(imH, (boxes[i][2] * imH)))
                 xmax = int(min(imW, (boxes[i][3] * imW)))
                 roi = frame[ymin:ymax, xmin:xmax]
+                confidence = scores[i]
 
-        return roi, ymin, xmin, ymax, xmax
+        return roi, ymin, xmin, ymax, xmax, confidence

@@ -12,8 +12,8 @@ def main():
     model_path = script_dir / '../../models/saved_model/license-detector_edgetpu.tflite'
     csv_file = script_dir / '../../detections.csv'
     img_dir = script_dir / '../../detections_img'
-    min_detection_confidence = 0.85
-    min_ocr_confidence = 0.85
+    min_detection_confidence = 0.9
+    min_ocr_confidence = 0.9
 
     # Variables para evitar loggear duplicados
     last_detected_plate = None
@@ -28,10 +28,20 @@ def main():
     try:
         while True:
             frame = webcam.get_frame()
-            roi, ymin, xmin, ymax, xmax = detector.detect_license_plate(frame)
+            roi, ymin, xmin, ymax, xmax, confidence = detector.detect_license_plate(frame)
             cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
 
             if roi is not None:
+
+                # Draw label
+                object_name = 'license' # Look up object name from "labels" array using class index
+                label = '%s: %d%%' % (object_name, int(confidence*100)) # Example: 'person: 72%'
+                labelSize, baseLine = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2) # Get font size
+                label_ymin = max(ymin, labelSize[1] + 10) # Make sure not to draw label too close to top of window
+                cv2.rectangle(frame, (xmin, label_ymin-labelSize[1]-10), (xmin+labelSize[0], label_ymin+baseLine-10), (255, 255, 255), cv2.FILLED) # Draw white box to put label text in
+                cv2.putText(frame, label, (xmin, label_ymin-7), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2) # Draw label text
+
+                #Aplicar OCR
                 detected_plate = ocr_processor.apply_ocr(roi)
 
                 if detected_plate:
