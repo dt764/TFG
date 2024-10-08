@@ -1,19 +1,16 @@
 import datetime
-import os
 import pathlib
 from license_plate_detector import LicensePlateDetector
 from webcam_capture import WebcamCapture
 from ocr_processor import OCRProcessor
-from logger import Logger
 import cv2
+import pika
+import json
 
 def main():
     script_dir = pathlib.Path(__file__).parent.absolute()
     model_path = script_dir / '../../models/saved_model/license-detector_edgetpu.tflite'
-    csv_file = script_dir / '../../detections.csv'
-    img_dir = script_dir / '../../detections_img'
     min_detection_confidence = 0.9
-    min_ocr_confidence = 0.9
 
     # Variables para evitar loggear duplicados
     last_detected_plate = None
@@ -23,7 +20,13 @@ def main():
     detector = LicensePlateDetector(str(model_path), min_detection_confidence)
     webcam = WebcamCapture()
     ocr_processor = OCRProcessor()
-    logger = Logger(img_dir, csv_file)
+
+    # Conexión a RabbitMQ
+    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+    channel = connection.channel()
+
+    # Declarar el exchange de tipo fanout
+    channel.exchange_declare(exchange='logs', exchange_type='fanout')
 
     try:
         while True:
@@ -38,7 +41,10 @@ def main():
                 label = '%s: %d%%' % (object_name, int(confidence*100)) # Example: 'person: 72%'
                 labelSize, baseLine = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2) # Get font size
                 label_ymin = max(ymin, labelSize[1] + 10) # Make sure not to draw label too close to top of window
-                cv2.rectangle(frame, (xmin, label_ymin-labelSize[1]-10), (xmin+labelSize[0], label_ymin+baseLine-10), (255, 255, 255), cv2.FILLED) # Draw white box to put label text in
+
+                # Draw white box to put label text in
+                cv2.rectangle(frame, (xmin, label_ymin-labelSize[1]-10), (xmin+labelSize[0], label_ymin+baseLine-10), (255, 255, 255), cv2.FILLED) 
+
                 cv2.putText(frame, label, (xmin, label_ymin-7), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2) # Draw label text
 
                 #Aplicar OCR
@@ -59,8 +65,18 @@ def main():
                         # Actualizar última detección
                         last_detected_plate = detected_plate
                         last_detection_time = current_time
+
+                        timestamp_str = last_detection_time.strftime('%Y%m%d_%H%M%S')
+
+                        message_object = {
+                            "matricula": detected_plate,
+                            "timestamp": timestamp_str,
+                        }
+
+                        # Convertir el objeto a JSON
+                        message = json.dumps(message_object)
                         
-                        logger.save_detection_to_csv(detected_plate, current_time, frame)
+                        channel.basic_publish(exchange='logs', routing_key='', body=message)
                     else:
                         print(f"Not Logging {detected_plate} because its too early to do it again")
                         
@@ -70,6 +86,7 @@ def main():
     finally:
         webcam.release()
         cv2.destroyAllWindows()
+        connection.close()
 
 if __name__ == "__main__":
     main()

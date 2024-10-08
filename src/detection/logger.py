@@ -1,27 +1,61 @@
 import csv
 import os
-import datetime
-import cv2
+import pathlib
+import pika
+import json
 
-class Logger:
-    def __init__(self, img_dir ,csv_file):
-        self.csv_file = csv_file
-        self.img_dir = img_dir
-        os.makedirs(self.img_dir, exist_ok=True)
 
-        if not os.path.isfile(csv_file):
-            with open(csv_file, mode='w', newline='') as file:
-                writer = csv.writer(file)
-                writer.writerow(['Timestamp', 'License Plate', 'Image Path'])
+script_dir = pathlib.Path(__file__).parent.absolute()
+csv_file = script_dir / '../../detections.csv'
+img_dir = script_dir / '../../detections_img'
 
-    def save_detection_to_csv(self, detected_plate, timestamp, frame):
-        with open(self.csv_file, mode='a', newline='') as file:
+def save_plate_record(ch, method, properties, body):
 
+    message_object = json.loads(body)
+
+    detected_plate = message_object['matricula']
+    timestamp = message_object['timestamp']
+
+    print(f" [x] Received {message_object}")
+    print(f"Matricula: {detected_plate}")
+    print(f"Matricula: {timestamp}")
+
+        
+    with open(csv_file, mode='a', newline='') as file:
+
+        writer = csv.writer(file)
+
+        image_path = img_dir / f'{timestamp}_{detected_plate}.jpg'
+
+        writer.writerow([timestamp, detected_plate, image_path])
+
+
+def main():
+
+    if not os.path.isfile(csv_file):
+        with open(csv_file, mode='w', newline='') as file:
             writer = csv.writer(file)
+            writer.writerow(['Timestamp', 'License Plate', 'Image Path'])
 
-            timestamp_str = timestamp.strftime('%Y%m%d_%H%M%S')
-            image_path = self.img_dir / f'{timestamp_str}_{detected_plate}.jpg'
+    connection_parameters = pika.ConnectionParameters('localhost')
 
-            writer.writerow([timestamp_str, detected_plate, image_path])
+    connection = pika.BlockingConnection(connection_parameters)
 
-            cv2.imwrite(image_path, frame)
+    channel = connection.channel()
+
+    channel.exchange_declare(exchange='logs', exchange_type='fanout')
+
+    queue = channel.queue_declare(queue='', exclusive=True)
+
+    channel.queue_bind(exchange='logs', queue=queue.method.queue)
+
+    channel.basic_consume(queue=queue.method.queue, auto_ack=True,
+        on_message_callback=save_plate_record)
+
+    print("Starting Consuming")
+
+    channel.start_consuming()
+        
+
+if __name__ == "__main__":
+    main()
