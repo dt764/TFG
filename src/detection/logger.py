@@ -18,7 +18,7 @@ def save_plate_record(ch, method, properties, body):
 
     print(f" [x] Received {message_object}")
     print(f"Matricula: {detected_plate}")
-    print(f"Matricula: {timestamp}")
+    print(f"Timestamp: {timestamp}")
 
         
     with open(csv_file, mode='a', newline='') as file:
@@ -28,6 +28,20 @@ def save_plate_record(ch, method, properties, body):
         image_path = img_dir / f'{timestamp}_{detected_plate}.jpg'
 
         writer.writerow([timestamp, detected_plate, image_path])
+
+    # Simulate verification process
+    is_valid = True  # Simulate validation logic
+    result = 'true' if is_valid else 'false'
+    
+    # Send verification result to gate
+    ch.basic_publish('', routing_key='verifier-to-gate', 
+                     properties=pika.BasicProperties(
+                         reply_to=properties.reply_to,
+                         correlation_id=properties.correlation_id
+                     ), 
+                     body=result)
+
+    print(f"Sent verification result: {result}")
 
 
 def main():
@@ -43,17 +57,12 @@ def main():
 
     channel = connection.channel()
 
-    channel.exchange_declare(exchange='logs', exchange_type='fanout')
+    channel.queue_declare(queue='detector-to-verifier')
 
-    queue = channel.queue_declare(queue='', exclusive=True)
+    channel.basic_consume(queue='detector-to-verifier', auto_ack=True,
+                        on_message_callback=save_plate_record)
 
-    channel.queue_bind(exchange='logs', queue=queue.method.queue)
-
-    channel.basic_consume(queue=queue.method.queue, auto_ack=True,
-        on_message_callback=save_plate_record)
-
-    print("Starting Consuming")
-
+    print("Verifier is waiting for codes...")
     channel.start_consuming()
         
 
