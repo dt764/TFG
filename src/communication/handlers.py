@@ -7,33 +7,70 @@ from other_util_classes import verifier
 
 def verifier_msg_handler(message):
 
+    """
+    Handles messages for the verifier, checking if the license plate is allowed.
+
+    This function processes the received message, extracts the license plate and 
+    timestamp, verifies if the plate is allowed, and returns a JSON-formatted response 
+    containing the original data along with the verification result.
+
+    Args:
+        message (bytes): The received message as a byte string in JSON format.
+
+    Returns:
+        str: A JSON-formatted string containing the plate, timestamp, and allowed status.
+    """
+
     msg_json = json.loads(message)
 
-    # Extraer los valores del mensaje recibido
     plate = msg_json.get("plate")
     timestamp = msg_json.get("timestamp")
     
-    # Verificar si la placa está permitida
     allowed = verifier.save_plate_record_n_verify(timestamp=timestamp, plate=plate)
 
-    # Responder con la misma información más el campo 'allowed'
     reply_dict = {
         "plate": plate,
         "timestamp": timestamp,
         "allowed": allowed
     }
 
-    # Convertir el diccionario de respuesta a una cadena JSON y luego a bytes
     return json.dumps(reply_dict)
 
 
 
 def screen_msg_handler(message):
+
+    """
+    Handles messages intended for the screen display.
+
+    This function simply parses the received message as a JSON object.
+
+    Args:
+        message (bytes): The received message as a byte string in JSON format.
+
+    Returns:
+        dict: The parsed JSON message as a Python dictionary.
+    """
+
     return json.loads(message)
 
 
 
 def gate_msg_handler(message):
+
+    """
+    Handles messages for controlling the gate.
+
+    This function processes the received message to determine if the door should be opened 
+    or closed based on the 'allowed' field, updates the door's state, and returns a response 
+    indicating the door state.
+
+    Args:
+        message (bytes): The received message as a byte string in JSON format.
+
+    Returns:
+        str: A JSON-formatted string containing the door state.
+    """
 
     msg_json = json.loads(message)
 
@@ -41,19 +78,30 @@ def gate_msg_handler(message):
 
     door.change_door_state(is_allowed)
     
-    # Verificar si la placa está permitida
 
-    # Responder con la misma información más el campo 'allowed'
+    # Make the reply for the gate
+
     reply_dict = {
         "open_door": is_allowed
   
     }
 
-    # Convertir el diccionario de respuesta a una cadena JSON y luego a bytes
     return json.dumps(reply_dict)
 
 
 def detect_msg_handler(message):
+    """
+    Handles messages for detecting if the door should open.
+
+    This function extracts the 'open_door' field from the received message.
+
+    Args:
+        message (bytes): The received message as a byte string in JSON format.
+
+    Returns:
+        bool: The value of the 'open_door' field, indicating if the door should be opened.
+    """
+
     msg_json = json.loads(message)
 
     return msg_json.get("open_door")
