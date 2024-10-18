@@ -7,3 +7,5 @@ __pycache__/
 src/UI/assets/
 detections_img
 detections.csv
+
+.vscode
