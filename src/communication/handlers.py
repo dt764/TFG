@@ -52,6 +52,8 @@ def screen_msg_handler(message):
         dict: The parsed JSON message as a Python dictionary.
     """
 
+
+    #Since the screen app wouldnt need to send back any message, doesnt need to do anything else
     return json.loads(message)
 
 
@@ -103,6 +105,8 @@ def detect_msg_handler(message):
     """
 
     msg_json = json.loads(message)
+
+    #The parking main doesnt reply after receiving the message, it just needs to know if the door is open.
 
     return msg_json.get("open_door")
 
