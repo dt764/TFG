@@ -16,7 +16,7 @@ from datetime import datetime
 class ImageWindow(QMainWindow):
     def __init__(self, image_path, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Imagen")
+        self.setWindowTitle("Image")
         self.setGeometry(100, 100, 800, 600)
 
         self.setWindowFlags(
@@ -38,7 +38,7 @@ class ImageWindow(QMainWindow):
         if not self.pixmap.isNull():
              self.update_image()
         else:
-            QMessageBox.warning(self, "Error", f"No se pudo cargar la imagen en la ruta: {image_path}")
+            QMessageBox.warning(self, "Error", f"Could not load the image at path: {image_path}")
 
         # Allowing resize
         self.setMinimumSize(200, 200)
@@ -61,20 +61,20 @@ class MyApp(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
-        # Connecting the buttons to change page of the stacked widget
+        # Connecting the buttons to change the page of the stacked widget
         self.ui.Historial_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(1))
         self.ui.Camara_btn.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(0))
         
         self.load_history()
 
-        # Conectar los QDateTimeEdit al método de filtrado
+        # Connect QDateTimeEdit to the filtering method
         self.ui.before_dateTimeEdit.setDateTime(QDateTime.currentDateTime())  # Set current time as placeholder
         self.ui.after_dateTimeEdit_2.setDateTime(QDateTime.currentDateTime())  # Same 
         
         self.ui.before_dateTimeEdit.dateTimeChanged.connect(self.filter_by_date)
         self.ui.after_dateTimeEdit_2.dateTimeChanged.connect(self.filter_by_date)
 
-        # Conectar el evento de clic en la celda con la función que abre la imagen
+        # Connect cell click event to the function that opens the image
         self.ui.tableWidget.cellDoubleClicked.connect(self.show_image)
 
 
@@ -83,7 +83,7 @@ class MyApp(QMainWindow):
         Loads the detection history from the CSV file into the QTableWidget.
         Uses the get_history function to retrieve the data.
         """
-        # Create the table in the first page of the stackedWidget
+        # Create the table on the first page of the stackedWidget
         tableWidget = self.ui.tableWidget
 
         # Set the resize mode so that columns occupy the available space
@@ -124,18 +124,18 @@ class MyApp(QMainWindow):
 
 
     def filter_by_date(self):
-        # Obtener las fechas seleccionadas Obtain the selected dates
-        fecha_inicio = self.ui.before_dateTimeEdit.dateTime().toPyDateTime()
-        fecha_fin = self.ui.after_dateTimeEdit_2.dateTime().toPyDateTime()
+        # Get the selected dates
+        start_date = self.ui.before_dateTimeEdit.dateTime().toPyDateTime()
+        end_date = self.ui.after_dateTimeEdit_2.dateTime().toPyDateTime()
 
         # Iterate through the table and filter the rows
         for row in range(self.ui.tableWidget.rowCount()):
-            fecha_item = self.ui.tableWidget.item(row, 0)  # Obtener el elemento en la primera columna
-            if fecha_item:
-                fecha_texto = fecha_item.text()  # Obtener el texto del elemento
-                fecha_tabla = datetime.strptime(fecha_texto, "%d/%m/%Y %H:%M:%S")
+            date_item = self.ui.tableWidget.item(row, 0)  # Get the element in the first column
+            if date_item:
+                date_text = date_item.text()  # Get the text from the element
+                table_date = datetime.strptime(date_text, "%d/%m/%Y %H:%M:%S")
 
-                if fecha_inicio <= fecha_tabla <= fecha_fin:
+                if start_date <= table_date <= end_date:
                     self.ui.tableWidget.showRow(row)
                 else:
                     self.ui.tableWidget.hideRow(row)
