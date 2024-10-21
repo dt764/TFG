@@ -56,12 +56,32 @@ def verify_plate(plate):
     """
     return plate in ALLOWED_PLATES
 
+
 def get_history():
     """
-    Placeholder function to get the history of detections.
+    Reads the detection history from the CSV file and returns it as a list of dictionaries.
 
     Returns:
-        None: Currently returns None, to be implemented.
+        list: A list of dictionaries, each containing the fields 'Timestamp', 'Plate', 
+              'Allowed', and 'Image Path' for each detection.
+              If the file does not exist, returns an empty list.
     """
-    history = None
+    # Check if the CSV file exists, if not, return an empty list
+    if not csv_file.exists():
+        return []
+
+    history = []
+
+    # Read the CSV file and populate the history list
+    with open(csv_file, mode='r', newline='') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            # Append each row as a dictionary to the history list
+            history.append({
+                'Timestamp': row['Timestamp'],
+                'Plate': row['Plate'],
+                'Allowed': row['Allowed'] == 'True',  # Convert 'Allowed' to a boolean
+                'Image Path': row['Image Path']
+            })
+
     return history
