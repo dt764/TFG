@@ -13,6 +13,17 @@ from other_util_classes.webcam_capture import WebcamCapture
 from other_util_classes.ocr_processor import OCRProcessor
 from communication.msg_disp_factory import MsgDispatcherFactory
 
+last_screen_message = None
+
+def update_screen_state(message, dispatcher):
+    """
+    Sends a message to the screen only if it differs from the last sent message.
+    """
+    global last_screen_message
+    if message != last_screen_message:
+        dispatcher.send_msg(message)
+        print(f"Screen Message: {message}")
+        last_screen_message = message
 
 def main():
     """
@@ -35,6 +46,7 @@ def main():
         parking_msg_dispatcher (MsgDispatcher): The dispatcher for sending and receiving messages for verification.
         opened_gate (bool): Indicates if the gate is open based on the last verification result.
     """
+        
     script_dir = pathlib.Path(__file__).parent.absolute()
     model_path = script_dir / '../../models/saved_model/license-detector_edgetpu.tflite'
     min_detection_confidence = 0.9
@@ -46,6 +58,11 @@ def main():
 
     # Create the message dispatcher for communication
     parking_msg_dispatcher = MsgDispatcherFactory.create_detector_dispatcher(
+        hostname='localhost'
+    )
+
+    # Create the message dispatcher for communication with screen
+    parking_to_screen_msg_dispatcher =  MsgDispatcherFactory.create_parking_to_screen_msg_dispatcher(
         hostname='localhost'
     )
 
@@ -63,9 +80,15 @@ def main():
             
             # Perform license plate detection
             roi, ymin, xmin, ymax, xmax, confidence = detector.detect_license_plate(frame)
+
+
             cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
 
             if roi is not None:
+
+                #Send message that a plate has been detected
+                #update_screen_state("Matrícula detectada, aplicando la lectura", parking_to_screen_msg_dispatcher)
+
                 # Draw the detection label
                 print("New Frame with detection:")
                 object_name = 'license'
@@ -89,7 +112,12 @@ def main():
                     current_time = datetime.datetime.now()
 
                     # Avoid logging the same plate if it was recently detected
-                    if detected_plate != last_detected_plate or last_detected_plate is None:
+                    if ((detected_plate != last_detected_plate or last_detected_plate is None)
+                        or ((current_time - last_detection_time).total_seconds() >  time_last_detect_threshold)):
+                        
+                        #Send message that license has been read
+                        update_screen_state(f"Verificando matrícula {detected_plate}", parking_to_screen_msg_dispatcher)
+
                         # Update the last detected plate
                         last_detected_plate = detected_plate
                         print(f"{detected_plate} will be sent to verifier")
@@ -109,21 +137,27 @@ def main():
                         parking_msg_dispatcher.send_msg(message=message)
                         parking_msg_dispatcher.wait_and_receive_msg()
                         opened_gate = parking_msg_dispatcher.get_reply_result()
-
-                        if opened_gate:
-                            print("Allowed to enter")
-                        else:
-                            print("Denied to enter")
+                            
                     else:
-                        # Check the time since the last detection to avoid duplicate logging
-                        time_since_last_detection = (current_time - last_detection_time).total_seconds()
-                        if time_since_last_detection < time_last_detect_threshold:
-                            print(f"Not logging / verifying {detected_plate} again." +
-                                  f" Gate will remain in same state (Opened = {opened_gate})")
+                        print(f"Not logging / verifying {detected_plate} again." +
+                                f" Gate will remain in same state (Opened = {opened_gate})")
+                        
+                    if opened_gate:
+                            #Send message that car is allowed
+                        update_screen_state(f"Matricula {detected_plate} permitida", parking_to_screen_msg_dispatcher)
+                        print("Allowed to enter")
+                    else:
+                        print("Denied to enter")
+                        #TODO: Send message that car is not allowed
+                        update_screen_state(f"Matricula {detected_plate} denegada", parking_to_screen_msg_dispatcher)
 
                     # Update the last detection time
                     last_detection_time = current_time
-            
+                    last_detected_plate = detected_plate
+            else:
+                #Send message to screen that is waiting for license plate
+               update_screen_state("Esperando matricula", parking_to_screen_msg_dispatcher)
+
             # Display the frame with the drawn detection
             cv2.imshow('Frame', frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):

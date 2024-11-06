@@ -17,7 +17,7 @@ class MsgDispatcher:
         receive_queue_name (str): The name of the queue or exchange for receiving messages.
         receive_is_fanout (bool): If True, a fanout exchange is set up for receiving.
         msg_handler (callable): Function to handle received messages.
-        stop_consumimg_after_received_message (bool): If True, stops consuming (or waiting for messages) after receiving a message. This is used when some other processing needs to be done before waiting for another message
+        stop_consuming_after_received_message (bool): If True, stops consuming (or waiting for messages) after receiving a message. This is used when some other processing needs to be done before waiting for another message
         reply_to_received_message (bool): If True, replies to the received message.
 
     Attributes:
@@ -39,7 +39,7 @@ class MsgDispatcher:
             self, hostname,
             publish_queue_name, publish_is_fanout,
             receive_queue_name, receive_is_fanout,
-            msg_handler, stop_consumimg_after_received_message,
+            msg_handler, stop_consuming_after_received_message,
             reply_to_received_message
         ):
         
@@ -58,43 +58,45 @@ class MsgDispatcher:
         self.publish_is_fanout = publish_is_fanout
         self.receive_is_fanout = receive_is_fanout
 
-        if(publish_is_fanout):
-            # When its fanout, you need to declare the exchange, with the specified name.
-            self.channel.exchange_declare(
-                exchange=self.publish_queue_name, exchange_type=ExchangeType.fanout)
-        else:
-            # When its not, a queue is created
-            self.channel.queue_declare(queue=self.publish_queue_name)
+        if(self.publish_queue_name is not None):
+            if(publish_is_fanout):
+                # When its fanout, you need to declare the exchange, with the specified name.
+                self.channel.exchange_declare(
+                    exchange=self.publish_queue_name, exchange_type=ExchangeType.fanout)
+            else:
+                # When its not, a queue is created
+                self.channel.queue_declare(queue=self.publish_queue_name)
 
 
         # Its the same thing for the receive exchange / queue.
-        if(receive_is_fanout):
+        if(self.receive_queue_name is not None):
+            if(receive_is_fanout):
 
-            # When its fanout, you declare the exchange and bind a temporary queue to the exchange.
+                # When its fanout, you declare the exchange and bind a temporary queue to the exchange.
 
-            self.channel.exchange_declare(
-                exchange=self.receive_queue_name, exchange_type=ExchangeType.fanout)
-    
-            self.queue = self.channel.queue_declare(queue='', exclusive=True)
+                self.channel.exchange_declare(
+                    exchange=self.receive_queue_name, exchange_type=ExchangeType.fanout)
+        
+                self.queue = self.channel.queue_declare(queue='', exclusive=True)
 
-            self.channel.queue_bind(
-                exchange=self.receive_queue_name, queue=self.queue.method.queue)
-            
-            self.channel.basic_consume(
-                queue=self.queue.method.queue,
-                on_message_callback=self._on_message_received)
-        else:
+                self.channel.queue_bind(
+                    exchange=self.receive_queue_name, queue=self.queue.method.queue)
+                
+                self.channel.basic_consume(
+                    queue=self.queue.method.queue,
+                    on_message_callback=self._on_message_received)
+            else:
 
-            #If not, a queue is declared with the specified name.
-            self.channel.queue_declare(queue=self.receive_queue_name)
-            self.channel.basic_consume(
-                queue=self.receive_queue_name,
-                on_message_callback=self._on_message_received)
+                #If not, a queue is declared with the specified name.
+                self.channel.queue_declare(queue=self.receive_queue_name)
+                self.channel.basic_consume(
+                    queue=self.receive_queue_name,
+                    on_message_callback=self._on_message_received)
 
         self.msg_handler = msg_handler
 
         # This is used
-        self.stop_consuming_after_received_msg = stop_consumimg_after_received_message
+        self.stop_consuming_after_received_msg = stop_consuming_after_received_message
         self.reply_to_received_msg = reply_to_received_message
 
         self.last_reply_result = None

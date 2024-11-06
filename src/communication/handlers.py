@@ -39,22 +39,11 @@ def verifier_msg_handler(message):
 
 
 def screen_msg_handler(message):
-
-    """
-    Handles messages intended for the screen display.
-
-    This function simply parses the received message as a JSON object.
-
-    Args:
-        message (bytes): The received message as a byte string in JSON format.
-
-    Returns:
-        dict: The parsed JSON message as a Python dictionary.
-    """
-
-
-    #Since the screen app wouldnt need to send back any message, doesnt need to do anything else
-    return json.loads(message)
+    # Decodifica el mensaje si está en JSON o string
+    decoded_message = message.decode()  # Si el mensaje está en bytes
+    print(f"Mensaje para la pantalla recibido: {decoded_message}")
+    # Aquí podrías actualizar el estado en la interfaz o loguearlo
+    return decoded_message
 
 
 
