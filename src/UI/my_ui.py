@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(994, 555)
+        MainWindow.resize(866, 595)
         MainWindow.setStyleSheet("")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
@@ -85,6 +85,9 @@ class Ui_MainWindow(object):
         self.Camara_btn = QtWidgets.QPushButton(self.btnBox)
         self.Camara_btn.setObjectName("Camara_btn")
         self.verticalLayout.addWidget(self.Camara_btn)
+        self.addUser_btn = QtWidgets.QPushButton(self.btnBox)
+        self.addUser_btn.setObjectName("addUser_btn")
+        self.verticalLayout.addWidget(self.addUser_btn)
         self.verticalLayout_2.addWidget(self.btnBox)
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.verticalLayout_2.addItem(spacerItem)
@@ -111,6 +114,7 @@ class Ui_MainWindow(object):
 "}")
         self.stackedWidget.setObjectName("stackedWidget")
         self.camara_page = QtWidgets.QWidget()
+        self.camara_page.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.camara_page.setStyleSheet("background-color: rgb(255, 255, 255)")
         self.camara_page.setObjectName("camara_page")
         self.verticalLayout_4 = QtWidgets.QVBoxLayout(self.camara_page)
@@ -207,6 +211,20 @@ class Ui_MainWindow(object):
         self.verticalLayout_5.setStretch(0, 2)
         self.verticalLayout_5.setStretch(1, 8)
         self.stackedWidget.addWidget(self.historial_page)
+        self.page = QtWidgets.QWidget()
+        self.page.setStyleSheet("background-color: rgb(255, 255, 255)")
+        self.page.setObjectName("page")
+        self.Title_frame = QtWidgets.QFrame(self.page)
+        self.Title_frame.setGeometry(QtCore.QRect(280, 220, 191, 61))
+        self.Title_frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.Title_frame.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.Title_frame.setObjectName("Title_frame")
+        self.verticalLayout_10 = QtWidgets.QVBoxLayout(self.Title_frame)
+        self.verticalLayout_10.setObjectName("verticalLayout_10")
+        self.label_5 = QtWidgets.QLabel(self.Title_frame)
+        self.label_5.setObjectName("label_5")
+        self.verticalLayout_10.addWidget(self.label_5)
+        self.stackedWidget.addWidget(self.page)
         self.verticalLayout_3.addWidget(self.stackedWidget)
         self.horizontalLayout.addWidget(self.main_frame)
         self.horizontalLayout.setStretch(0, 1)
@@ -214,7 +232,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
-        self.stackedWidget.setCurrentIndex(1)
+        self.stackedWidget.setCurrentIndex(2)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -222,7 +240,19 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.Historial_btn.setText(_translate("MainWindow", "Historial"))
         self.Camara_btn.setText(_translate("MainWindow", "Camara"))
+        self.addUser_btn.setText(_translate("MainWindow", "PushButton"))
         self.label_2.setText(_translate("MainWindow", "· Filtar por fecha:"))
         self.label_3.setText(_translate("MainWindow", "- Después de:"))
         self.label_4.setText(_translate("MainWindow", "- Antes de:"))
+        self.label_5.setText(_translate("MainWindow", "TextLabel"))
 import resources_rc
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec_())
