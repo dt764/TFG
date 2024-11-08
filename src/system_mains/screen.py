@@ -15,24 +15,19 @@ class StatusScreen(QMainWindow):
         self.status_label = QLabel("Esperando estado...", self)
         self.status_label.setGeometry(50, 50, 300, 50)
         
-        # Crear el dispatcher
         self.msg_dispatcher = MsgDispatcherFactory.create_screen_dispatcher(hostname)
-        
-        # Hilo para esperar mensajes en el background
+
         threading.Thread(target=self.msg_dispatcher.wait_and_receive_msg, daemon=True).start()
 
-    def update_status(self, status):
-        self.status_label.setText(status)
 
-# Código principal de la aplicación
+
 def main():
     app = QApplication(sys.argv)
-    hostname = "localhost"  # o el hostname de tu RabbitMQ
+    hostname = "localhost"
     screen = StatusScreen(hostname)
 
-    # Configura la actualización en el callback de mensajes
     def handle_message_update(message):
-        decoded_message = message.decode()  # Decodificar si es necesario
+        decoded_message = message.decode()
         screen.update_status(decoded_message)
 
     screen.msg_dispatcher.msg_handler = handle_message_update

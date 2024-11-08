@@ -148,7 +148,7 @@ def main():
                         print("Allowed to enter")
                     else:
                         print("Denied to enter")
-                        #TODO: Send message that car is not allowed
+                        #Send message that car is not allowed
                         update_screen_state(f"Matricula {detected_plate} denegada", parking_to_screen_msg_dispatcher)
 
                     # Update the last detection time

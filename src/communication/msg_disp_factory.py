@@ -2,6 +2,7 @@
 
 from .msg_dispatcher import MsgDispatcher
 from .handlers import *
+from .mqtt_msg import MQTT_Msg_Disp
 
 class MsgDispatcherFactory:
  
@@ -16,8 +17,8 @@ class MsgDispatcherFactory:
     VERIFIER_QUEUE_NAME = 'verifier_queue' # The queue between the parking main and the verifier
     DETECTOR_QUEUE_NAME = 'detector_queue' # The queue which the parking main will use to receive messages from the gate main.
     EXCHANGE_NAME = 'detection_exchange' # The exchange which will receive the verification results.
+
     SCREEN_QUEUE_NAME = 'parking_status'
-    
 
     """
     Creates the MsgDispatcher object for the parking main.
@@ -81,6 +82,16 @@ class MsgDispatcherFactory:
 
     @staticmethod
     def create_screen_dispatcher(hostname):
+        return MQTT_Msg_Disp(
+            hostname=hostname,
+            port=1883,
+            publish_topic=None,
+            sub_topic=MsgDispatcherFactory.SCREEN_QUEUE_NAME,
+            on_message_callback=None,
+            stop_consuming_after_received_message=False
+        )
+
+        '''
         return MsgDispatcher(
             hostname=hostname,
             publish_queue_name=None,
@@ -91,6 +102,7 @@ class MsgDispatcherFactory:
             reply_to_received_message=False,
             stop_consuming_after_received_message=False
         )
+        '''
     
     """
 
@@ -119,6 +131,16 @@ class MsgDispatcherFactory:
     
     @staticmethod
     def create_parking_to_screen_msg_dispatcher(hostname):
+
+        return MQTT_Msg_Disp(
+            hostname=hostname,
+            port=1883,
+            publish_topic=MsgDispatcherFactory.SCREEN_QUEUE_NAME,
+            sub_topic=None,
+            on_message_callback=None,
+            stop_consuming_after_received_message=True
+        )
+        '''
         return MsgDispatcher(
             hostname=hostname,
             publish_queue_name=MsgDispatcherFactory.SCREEN_QUEUE_NAME,
@@ -129,3 +151,4 @@ class MsgDispatcherFactory:
             reply_to_received_message=True,
             stop_consuming_after_received_message=False
         )
+        '''
