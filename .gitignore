@@ -9,3 +9,5 @@ detections_img
 detections.csv
 
 .vscode
+instance
+backend
