@@ -4,6 +4,8 @@ import cv2
 import json
 import sys
 import os
+import pygame
+import numpy as np
 
 # Add project root directory to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -72,6 +74,10 @@ def main():
     detector = LicensePlateDetector(str(model_path), min_detection_confidence)
     webcam = WebcamCapture()
     ocr_processor = OCRProcessor()
+
+    # Initialize pygame for displaying the frames
+    pygame.init()
+    screen = None
 
     try:
         while True:
@@ -158,15 +164,38 @@ def main():
                 #Send message to screen that is waiting for license plate
                update_screen_state("Esperando matricula", parking_to_screen_msg_dispatcher)
 
+            # Convert frame to RGB for pygame
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            frame_surface = pygame.surfarray.make_surface(np.transpose(frame_rgb, (1, 0, 2)))
+
+            # Initialize screen if not already initialized
+            if screen is None:
+                screen = pygame.display.set_mode((frame.shape[1], frame.shape[0]))
+
+            # Display the frame
+            screen.blit(frame_surface, (0, 0))
+            pygame.display.flip()
+
+            # Handle events and allow exiting with the 'q' key
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    raise KeyboardInterrupt
+
             # Display the frame with the drawn detection
-            cv2.imshow('Frame', frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
+            #cv2.imshow('Frame', frame)
+            #if cv2.waitKey(1) & 0xFF == ord('q'):
+                #break
+
+    except KeyboardInterrupt:
+        print("Interrupción manual detectada. Cerrando el programa...")
+    except Exception as e:
+         print(f"Error inesperado durante el programa: {e}")      
 
     finally:
         # Release resources and close the application
         webcam.release()
-        cv2.destroyAllWindows()
+        #cv2.destroyAllWindows()
+        pygame.quit()
         parking_msg_dispatcher.close()  # Close the RabbitMQ connection when finished
 
 if __name__ == "__main__":
