@@ -109,13 +109,22 @@ class MsgDispatcher:
         Args:
             message (str): The message to be sent.
         """
-        
-        if(self.publish_is_fanout):
-            self.channel.basic_publish(
-                exchange=self.publish_queue_name, routing_key='', body=message)
-        else:
-            self.channel.basic_publish(
-                exchange='', routing_key=self.publish_queue_name, body=message)
+        try:
+            if self.channel.is_open:
+                if self.publish_is_fanout:
+                    self.channel.basic_publish(
+                        exchange=self.publish_queue_name, routing_key='', body=message)
+                else:
+                    self.channel.basic_publish(
+                        exchange='', routing_key=self.publish_queue_name, body=message)
+            else:
+                print("El canal está cerrado. No se puede enviar el mensaje.")
+        except pika.exceptions.ChannelClosedByBroker as e:
+            print(f"El canal fue cerrado por el broker: {e}")
+        except pika.exceptions.ChannelWrongStateError as e:
+            print(f"Error de estado del canal: {e}")
+        except Exception as e:
+            print(f"Error inesperado al enviar mensaje: {e}")
 
 
     def _on_message_received(
@@ -166,11 +175,20 @@ class MsgDispatcher:
 
     def wait_and_receive_msg(self):
         """
-
-        Starts wating to receive messages.
-
+        Starts waiting to receive messages.
         """
-        self.channel.start_consuming()
+        try:
+            if self.channel.is_open:
+                self.channel.start_consuming()
+            else:
+                print("El canal está cerrado. No se puede consumir mensajes.")
+        except pika.exceptions.ConnectionClosedByBroker as e:
+            print(f"La conexión fue cerrada por el broker: {e}")
+        except pika.exceptions.ChannelWrongStateError as e:
+            print(f"Error de estado del canal al consumir mensajes: {e}")
+        except Exception as e:
+            print(f"Error inesperado durante la recepción de mensajes: {e}")
+            self.close()
 
     def close(self):
         """
@@ -178,5 +196,12 @@ class MsgDispatcher:
         Closes the connection to RabbitMQ.
 
         """
-        if self.connection:
-            self.connection.close()
+        try:
+            if self.connection and self.connection.is_open:
+                self.connection.close()
+            else:
+                print("La conexión ya estaba cerrada o es inválida.")
+        except pika.exceptions.ConnectionWrongStateError as e:
+            print(f"Error de estado de la conexión al cerrar: {e}")
+        except Exception as e:
+            print(f"Error inesperado al cerrar la conexión: {e}")
