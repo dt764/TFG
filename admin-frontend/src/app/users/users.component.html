@@ -1,0 +1,23 @@
+<h1>Characters</h1>
+<div class="content-container">
+  <div 
+    class="characters-container"
+    *ngFor="let user of users" >
+    <a 
+        routerLink="/users/{{user.id}}"
+        class="">
+        <span>
+            {{user.nombre}} {{user.apellidos}}
+        </span>
+    </a>
+    <ul>
+        <li>
+            {{user.matricula1}}
+        </li>
+        <li>
+            {{user.matricula1}}
+        </li>
+    </ul>
+  </div>
+</div>
+

@@ -1,0 +1,55 @@
+<h1> Detalles del usuario</h1>
+
+<div class="content-container">
+    <div *ngIf="usuario" class="content">
+        
+        <div class="info-container">
+            <h2>{{usuario.nombre}} Details</h2>
+
+            <div class="info">
+                <h3>Info</h3>
+                <div class="nombre-container">
+                    <label for="usuario-nombre"> Nombre: </label>
+                    <input id="usuario-nombre" [(ngModel)]="usuario.nombre" placeholder="nombre">
+                </div>
+                <div class="apellidos-container">
+                    <label for="usuario-apellidos"> Apellidos: </label>
+                    <input id="usuario-apellidos" [(ngModel)]="usuario.apellidos" placeholder="apellidos">
+                </div>
+            </div>
+        
+            <div class="info">
+                <h3>Matriculas</h3>
+                <ul>
+                    <li>
+                        <input id="matricula1" type="text" [(ngModel)]="usuario.matricula1" placeholder="0000BBB">
+                    </li>
+                    <li>
+                        <input id="matricula2" [(ngModel)]="usuario.matricula2" placeholder="0000BBB">
+                    </li>
+                </ul>
+            </div>
+            <div class="buttons-container">
+                <button type="button" (click)="save()">save</button>
+            </div>
+        </div>
+    </div>
+    <table>
+        <tr>
+            <th>Nombre</th>
+            <th>Edad</th>
+            <th>Ciudad</th>
+        </tr>
+        <tr *ngFor="let historial of historial_usuario">
+            <td>
+                {{historial.matricula}}
+            </td>
+            <td>
+                {{historial.fecha}}
+            </td>
+            <td>
+                {{historial.permitido}}
+            </td>
+        </tr>
+    </table>
+</div>
