@@ -65,13 +65,18 @@ class MsgDispatcher:
         self.receive_is_fanout = receive_is_fanout
         
         self.logger = logging.getLogger(self.__class__.__name__)
+        #self.connection = None 
+        #self.channel = None
+
         self.logger.info("Iniciando MsgDispatcher...")
 
         # Establish connection
         self.__reconnect()
+        
 
 
     def __reconnect(self):
+
         max_retries = 5
         retry_delay = 2
         attempt = 0
@@ -112,16 +117,11 @@ class MsgDispatcher:
                 self.channel.queue_bind(
                     exchange=self.receive_queue_name, queue=self.queue.method.queue
                 )
-                self.channel.basic_consume(
-                    queue=self.queue.method.queue,
-                    on_message_callback=self._on_message_received
-                )
+                
             else:
                 self.channel.queue_declare(queue=self.receive_queue_name)
-                self.channel.basic_consume(
-                    queue=self.receive_queue_name,
-                    on_message_callback=self._on_message_received
-                )
+
+
 
 
     def send_msg(self, message):
@@ -190,6 +190,7 @@ class MsgDispatcher:
         # E.g. The parking waits and handles a different message compared to the gate program.
         # The result is assigned to the atribute, to get it later, and more work with it.
 
+        print("asignando last reply result")
         self.last_reply_result = self.msg_handler(body)
 
         if self.reply_to_received_msg:
@@ -222,18 +223,27 @@ class MsgDispatcher:
         """
         Starts waiting to receive messages.
         """
-        max_retries = 3
-        retry_delay = 1  # Retraso en segundos entre reintentos
-        attempt = 0
-        sent = False
 
-        while not sent and attempt <= max_retries:
+        max_retries = 5
+        retry_delay = 2  # Retraso en segundos entre reintentos
+        attempt = 0
+        received = False
+
+        if self.receive_is_fanout:
+            self.channel.basic_consume(
+                    queue=self.queue.method.queue,
+                    on_message_callback=self._on_message_received)
+        else:
+            self.channel.basic_consume(
+                    queue=self.receive_queue_name,
+                    on_message_callback=self._on_message_received
+                )
+
+        while not received and attempt <= max_retries:
             try:
-                if self.channel.is_open:
-                    self.logger.info("Esperando mensajes...")
-                    self.channel.start_consuming()
-                else:
-                    self.logger.warning("El canal está cerrado. No se puede consumir mensajes.")
+                self.logger.info("Esperando mensajes...")
+                self.channel.start_consuming()
+                received = True
             except pika.exceptions.AMQPConnectionError as e:
                     attempt += 1
                     self.logger.warning(f"Error de conexión al enviar mensaje: {e}. Intento {attempt} de {max_retries}.")
@@ -245,6 +255,8 @@ class MsgDispatcher:
                     else:
                         self.logger.error(f"No se pudo enviar el mensaje después de {max_retries} intentos.")
                         raise Exception("Fallo al enviar el mensaje después de múltiples intentos") from e
+            except pika.exceptions.AMQPChannelError as e:
+                    self.logger.error(f"Error en el canal: {e}")
 
     def close(self):
         """

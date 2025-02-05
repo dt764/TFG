@@ -1,7 +1,6 @@
 # msg_dispatcher_factory.py
 
 from .msg_dispatcher import MsgDispatcher
-from .handlers import *
 from .mqtt_msg import MQTT_Msg_Disp
 
 class MsgDispatcherFactory:
@@ -31,14 +30,14 @@ class MsgDispatcherFactory:
     """
 
     @staticmethod
-    def create_detector_dispatcher(hostname):
+    def create_detector_dispatcher(hostname, msg_handler):
         return MsgDispatcher(
             hostname=hostname,
             publish_queue_name=MsgDispatcherFactory.VERIFIER_QUEUE_NAME,
             publish_is_fanout=False,
             receive_queue_name=MsgDispatcherFactory.DETECTOR_QUEUE_NAME,
             receive_is_fanout=False,
-            msg_handler=detect_msg_handler,
+            msg_handler=msg_handler,
             reply_to_received_message=False,
             stop_consuming_after_received_message=True
         )
@@ -56,14 +55,14 @@ class MsgDispatcherFactory:
     """
 
     @staticmethod
-    def create_verifier_dispatcher(hostname):
+    def create_verifier_dispatcher(hostname, msg_handler):
         return MsgDispatcher(
             hostname=hostname,
             publish_queue_name=MsgDispatcherFactory.EXCHANGE_NAME,
             publish_is_fanout=True,
             receive_queue_name=MsgDispatcherFactory.VERIFIER_QUEUE_NAME,
             receive_is_fanout=False,
-            msg_handler=verifier_msg_handler,
+            msg_handler=msg_handler,
             reply_to_received_message=True,
             stop_consuming_after_received_message=False
         )
@@ -117,14 +116,14 @@ class MsgDispatcherFactory:
     """
 
     @staticmethod
-    def create_gate_dispatcher(hostname):
+    def create_gate_dispatcher(hostname, msg_handler):
         return MsgDispatcher(
             hostname=hostname,
             publish_queue_name=MsgDispatcherFactory.DETECTOR_QUEUE_NAME,
             publish_is_fanout=False,
             receive_queue_name=MsgDispatcherFactory.EXCHANGE_NAME,
             receive_is_fanout=True,
-            msg_handler=gate_msg_handler,
+            msg_handler=msg_handler,
             reply_to_received_message=True,
             stop_consuming_after_received_message=False
         )

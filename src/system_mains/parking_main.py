@@ -6,6 +6,9 @@ import sys
 import os
 import pygame
 import numpy as np
+import logging
+import logging.config
+import yaml
 
 # Add project root directory to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -14,6 +17,8 @@ from other_util_classes.license_plate_detector import LicensePlateDetector
 from other_util_classes.webcam_capture import WebcamCapture
 from other_util_classes.ocr_processor import OCRProcessor
 from communication.msg_disp_factory import MsgDispatcherFactory
+
+
 
 last_screen_message = None
 
@@ -26,6 +31,36 @@ def update_screen_state(message, dispatcher):
         dispatcher.send_msg(message)
         print(f"Screen Message: {message}")
         last_screen_message = message
+
+
+
+
+def detect_msg_handler(message):
+    """
+    Handles messages for detecting if the door should open.
+
+    This function extracts the 'open_door' field from the received message.
+
+    Args:
+        message (bytes): The received message as a byte string in JSON format.
+
+    Returns:
+        bool: The value of the 'open_door' field, indicating if the door should be opened.
+    """
+    msg_json = json.loads(message.decode("utf-8"))
+
+    is_allowed = msg_json.get("permitido")
+    matricula = msg_json.get("matricula")
+
+    reply_dict = {
+        "matricula": matricula,
+        "permitido": is_allowed
+  
+    }
+
+    return reply_dict
+
+
 
 def main():
     """
@@ -58,14 +93,26 @@ def main():
     last_detection_time = None
     time_last_detect_threshold = 3
 
+    script_dir = pathlib.Path(__file__).parent.absolute()
+    logger_path = script_dir / './logger_config.yaml'
+
+    # Cargar la configuración del archivo YAML
+    with open(logger_path, "r") as f:
+        config = yaml.safe_load(f)
+
+    logging.config.dictConfig(config)
+
+
     # Create the message dispatcher for communication
     parking_msg_dispatcher = MsgDispatcherFactory.create_detector_dispatcher(
-        hostname='localhost'
+        hostname='localhost',
+        msg_handler=detect_msg_handler
     )
 
     # Create the message dispatcher for communication with screen
     parking_to_screen_msg_dispatcher =  MsgDispatcherFactory.create_parking_to_screen_msg_dispatcher(
-        hostname='localhost'
+        hostname='localhost',
+        
     )
 
     opened_gate = False
@@ -77,7 +124,7 @@ def main():
 
     # Initialize pygame for displaying the frames
     pygame.init()
-    screen = None
+    webcam_feed_window = pygame.display.set_mode((frame.shape[1], frame.shape[0]))
 
     try:
         while True:
@@ -132,8 +179,8 @@ def main():
 
                         # Create the message payload
                         msg_dict = {
-                            "plate": detected_plate,
-                            "timestamp": timestamp_str
+                            "matricula": detected_plate,
+                            "fecha": timestamp_str
                         }
 
                         # Convert the message to JSON
@@ -141,8 +188,20 @@ def main():
 
                         # Send the message to the verifier and wait for a response
                         parking_msg_dispatcher.send_msg(message=message)
-                        parking_msg_dispatcher.wait_and_receive_msg()
-                        opened_gate = parking_msg_dispatcher.get_reply_result()
+
+                        good_response = False
+
+                        while not good_response:
+                            parking_msg_dispatcher.wait_and_receive_msg()
+                            response_dict = parking_msg_dispatcher.get_reply_result()
+                            print(response_dict["matricula"])
+                            print(response_dict["permitido"])
+                            print(detected_plate)
+
+                            if response_dict["matricula"] == detected_plate:
+                                opened_gate = response_dict["permitido"]
+                                good_response = True
+
                             
                     else:
                         print(f"Not logging / verifying {detected_plate} again." +
@@ -169,11 +228,9 @@ def main():
             frame_surface = pygame.surfarray.make_surface(np.transpose(frame_rgb, (1, 0, 2)))
 
             # Initialize screen if not already initialized
-            if screen is None:
-                screen = pygame.display.set_mode((frame.shape[1], frame.shape[0]))
 
             # Display the frame
-            screen.blit(frame_surface, (0, 0))
+            webcam_feed_window.blit(frame_surface, (0, 0))
             pygame.display.flip()
 
             # Handle events and allow exiting with the 'q' key
