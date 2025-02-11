@@ -1,0 +1,598 @@
+{
+    "usuarios": [
+        {
+            "id": 1,
+            "correo": "juan.perez@example.com",
+            "nombre": "Juan",
+            "apellidos": "P\u00e9rez",
+            "matricula1": "ABC123",
+            "matricula2": "3547NXB"
+        },
+        {
+            "id": 2,
+            "correo": "maria.gomez@example.com",
+            "nombre": "Mareda",
+            "apellidos": "G\u00e1mez",
+            "matricula1": "DEF456",
+            "matricula2": "GHI101"
+        },
+        {
+            "id": 3,
+            "correo": "luis.lopez@example.com",
+            "nombre": "Luis",
+            "apellidos": "L\u00f3pez",
+            "matricula1": "JKL222",
+            "matricula2": "MNO333"
+        },
+        {
+            "id": 4,
+            "correo": "a",
+            "nombre": "a",
+            "apellidos": "a",
+            "matricula1": "a",
+            "matricula2": "a"
+        }
+    ],
+    "historial": [
+        {
+            "id": 1,
+            "usuario_id": 1,
+            "matricula": "ABC123",
+            "fecha": "2024-10-25",
+            "permitido": true
+        },
+        {
+            "id": 2,
+            "usuario_id": 2,
+            "matricula": "DEF456",
+            "fecha": "2024-10-26",
+            "permitido": false
+        },
+        {
+            "id": 3,
+            "usuario_id": 3,
+            "matricula": "XYZ789",
+            "fecha": "2024-10-27",
+            "permitido": true
+        },
+        {
+            "id": 4,
+            "usuario_id": 3,
+            "matricula": "MNO333",
+            "fecha": "2024-10-28",
+            "permitido": false
+        },
+        {
+            "id": 5,
+            "usuario_id": 1,
+            "matricula": "JKL222",
+            "fecha": "2024-10-29",
+            "permitido": true
+        },
+        {
+            "id": 6,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_002946",
+            "permitido": true
+        },
+        {
+            "id": 7,
+            "usuario_id": null,
+            "matricula": "3547NXS",
+            "fecha": "20250204_003819",
+            "permitido": false
+        },
+        {
+            "id": 8,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_003820",
+            "permitido": true
+        },
+        {
+            "id": 9,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_004006",
+            "permitido": true
+        },
+        {
+            "id": 10,
+            "usuario_id": null,
+            "matricula": "3527NTB",
+            "fecha": "20250204_004114",
+            "permitido": false
+        },
+        {
+            "id": 11,
+            "usuario_id": null,
+            "matricula": "3527NXB",
+            "fecha": "20250204_004114",
+            "permitido": false
+        },
+        {
+            "id": 12,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_004115",
+            "permitido": true
+        },
+        {
+            "id": 13,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_004330",
+            "permitido": true
+        },
+        {
+            "id": 14,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_004409",
+            "permitido": true
+        },
+        {
+            "id": 15,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_004456",
+            "permitido": true
+        },
+        {
+            "id": 16,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_004501",
+            "permitido": true
+        },
+        {
+            "id": 17,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_004529",
+            "permitido": true
+        },
+        {
+            "id": 18,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_004658",
+            "permitido": true
+        },
+        {
+            "id": 19,
+            "usuario_id": null,
+            "matricula": "3527NXB",
+            "fecha": "20250204_005047",
+            "permitido": false
+        },
+        {
+            "id": 20,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_005047",
+            "permitido": true
+        },
+        {
+            "id": 21,
+            "usuario_id": null,
+            "matricula": "3527NTS",
+            "fecha": "20250204_005049",
+            "permitido": false
+        },
+        {
+            "id": 22,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_005209",
+            "permitido": true
+        },
+        {
+            "id": 23,
+            "usuario_id": null,
+            "matricula": "8227NXB",
+            "fecha": "20250204_005315",
+            "permitido": false
+        },
+        {
+            "id": 24,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_005316",
+            "permitido": true
+        },
+        {
+            "id": 25,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_005319",
+            "permitido": true
+        },
+        {
+            "id": 26,
+            "usuario_id": null,
+            "matricula": "3527NXB",
+            "fecha": "20250204_005345",
+            "permitido": false
+        },
+        {
+            "id": 27,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_005345",
+            "permitido": true
+        },
+        {
+            "id": 28,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_010909",
+            "permitido": true
+        },
+        {
+            "id": 29,
+            "usuario_id": null,
+            "matricula": "3527NXB",
+            "fecha": "20250204_010937",
+            "permitido": false
+        },
+        {
+            "id": 30,
+            "usuario_id": null,
+            "matricula": "2527NXB",
+            "fecha": "20250204_010937",
+            "permitido": false
+        },
+        {
+            "id": 31,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_010937",
+            "permitido": true
+        },
+        {
+            "id": 32,
+            "usuario_id": null,
+            "matricula": "0277NXB",
+            "fecha": "20250204_011212",
+            "permitido": false
+        },
+        {
+            "id": 33,
+            "usuario_id": null,
+            "matricula": "2527NXB",
+            "fecha": "20250204_011213",
+            "permitido": false
+        },
+        {
+            "id": 34,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_011213",
+            "permitido": true
+        },
+        {
+            "id": 35,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_011339",
+            "permitido": true
+        },
+        {
+            "id": 36,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_011414",
+            "permitido": true
+        },
+        {
+            "id": 37,
+            "usuario_id": null,
+            "matricula": "8527NXB",
+            "fecha": "20250204_011428",
+            "permitido": false
+        },
+        {
+            "id": 38,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_011429",
+            "permitido": true
+        },
+        {
+            "id": 39,
+            "usuario_id": null,
+            "matricula": "3541NXB",
+            "fecha": "20250204_011621",
+            "permitido": false
+        },
+        {
+            "id": 40,
+            "usuario_id": null,
+            "matricula": "3527NXB",
+            "fecha": "20250204_011622",
+            "permitido": false
+        },
+        {
+            "id": 41,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_011622",
+            "permitido": true
+        },
+        {
+            "id": 42,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_012051",
+            "permitido": true
+        },
+        {
+            "id": 43,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_012235",
+            "permitido": true
+        },
+        {
+            "id": 44,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_012247",
+            "permitido": true
+        },
+        {
+            "id": 45,
+            "usuario_id": null,
+            "matricula": "3806KZS",
+            "fecha": "20250204_012346",
+            "permitido": false
+        },
+        {
+            "id": 46,
+            "usuario_id": null,
+            "matricula": "8806KZS",
+            "fecha": "20250204_012347",
+            "permitido": false
+        },
+        {
+            "id": 47,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_163804",
+            "permitido": true
+        },
+        {
+            "id": 48,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_164054",
+            "permitido": true
+        },
+        {
+            "id": 49,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_164301",
+            "permitido": true
+        },
+        {
+            "id": 50,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_164335",
+            "permitido": true
+        },
+        {
+            "id": 51,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_164522",
+            "permitido": true
+        },
+        {
+            "id": 52,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_164553",
+            "permitido": true
+        },
+        {
+            "id": 53,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_164717",
+            "permitido": true
+        },
+        {
+            "id": 54,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_164804",
+            "permitido": true
+        },
+        {
+            "id": 55,
+            "usuario_id": null,
+            "matricula": "3527NXB",
+            "fecha": "20250204_164804",
+            "permitido": false
+        },
+        {
+            "id": 56,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_164954",
+            "permitido": true
+        },
+        {
+            "id": 57,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_165055",
+            "permitido": true
+        },
+        {
+            "id": 58,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_165114",
+            "permitido": true
+        },
+        {
+            "id": 59,
+            "usuario_id": null,
+            "matricula": "6208KZS",
+            "fecha": "20250204_165214",
+            "permitido": false
+        },
+        {
+            "id": 60,
+            "usuario_id": null,
+            "matricula": "3806KZS",
+            "fecha": "20250204_170614",
+            "permitido": false
+        },
+        {
+            "id": 61,
+            "usuario_id": null,
+            "matricula": "8806KZS",
+            "fecha": "20250204_170945",
+            "permitido": false
+        },
+        {
+            "id": 62,
+            "usuario_id": null,
+            "matricula": "8806KZS",
+            "fecha": "20250204_171026",
+            "permitido": false
+        },
+        {
+            "id": 63,
+            "usuario_id": null,
+            "matricula": "8806KZS",
+            "fecha": "20250204_171131",
+            "permitido": false
+        },
+        {
+            "id": 64,
+            "usuario_id": null,
+            "matricula": "8806KZS",
+            "fecha": "20250204_171201",
+            "permitido": false
+        },
+        {
+            "id": 65,
+            "usuario_id": null,
+            "matricula": "6806KZS",
+            "fecha": "20250204_173923",
+            "permitido": false
+        },
+        {
+            "id": 66,
+            "usuario_id": null,
+            "matricula": "8806KZS",
+            "fecha": "20250204_174325",
+            "permitido": false
+        },
+        {
+            "id": 67,
+            "usuario_id": null,
+            "matricula": "8806KZS",
+            "fecha": "20250204_174440",
+            "permitido": false
+        },
+        {
+            "id": 68,
+            "usuario_id": null,
+            "matricula": "3806KZS",
+            "fecha": "20250204_174458",
+            "permitido": false
+        },
+        {
+            "id": 69,
+            "usuario_id": null,
+            "matricula": "3806KZS",
+            "fecha": "20250204_174724",
+            "permitido": false
+        },
+        {
+            "id": 70,
+            "usuario_id": null,
+            "matricula": "8806KZS",
+            "fecha": "20250204_180130",
+            "permitido": false
+        },
+        {
+            "id": 71,
+            "usuario_id": null,
+            "matricula": "8806KZS",
+            "fecha": "20250204_180157",
+            "permitido": false
+        },
+        {
+            "id": 72,
+            "usuario_id": null,
+            "matricula": "8806KZS",
+            "fecha": "20250204_180207",
+            "permitido": false
+        },
+        {
+            "id": 73,
+            "usuario_id": null,
+            "matricula": "8806KZS",
+            "fecha": "20250204_180218",
+            "permitido": false
+        },
+        {
+            "id": 74,
+            "usuario_id": null,
+            "matricula": "8806KZS",
+            "fecha": "20250204_180322",
+            "permitido": false
+        },
+        {
+            "id": 75,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_180536",
+            "permitido": true
+        },
+        {
+            "id": 76,
+            "usuario_id": 1,
+            "matricula": "3547NXB",
+            "fecha": "20250204_181344",
+            "permitido": true
+        },
+        {
+            "id": 77,
+            "usuario_id": null,
+            "matricula": "0367NXB",
+            "fecha": "20250204_191406",
+            "permitido": false
+        },
+        {
+            "id": 78,
+            "usuario_id": null,
+            "matricula": "7008KZS",
+            "fecha": "20250204_191721",
+            "permitido": false
+        },
+        {
+            "id": 79,
+            "usuario_id": null,
+            "matricula": "3806KZS",
+            "fecha": "20250204_191811",
+            "permitido": false
+        },
+        {
+            "id": 80,
+            "usuario_id": null,
+            "matricula": "8806KZS",
+            "fecha": "20250204_191822",
+            "permitido": false
+        }
+    ]
+}
