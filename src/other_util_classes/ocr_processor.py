@@ -9,10 +9,11 @@ class OCRProcessor:
         reader (easyocr.Reader): An EasyOCR reader object used for processing OCR.
     """
     
-    def __init__(self):
+    def __init__(self, min_confidence=0.9):
         """
         Initializes an OCRProcessor object, creating an EasyOCR reader for English language detection.
         """
+        self.min_confidence = min_confidence
         self.reader = easyocr.Reader(['en'])
 
     def is_valid_plate(self, plate):
@@ -29,10 +30,10 @@ class OCRProcessor:
             bool: True if the plate matches the defined format, otherwise False.
         """
         # Define a regex pattern for the license plate format: 4 numeric characters followed by 3 alphabetic characters
-        pattern = re.compile(r'^\d{4}[B-DF-HJ-NP-TV-Z]{3}$')
+        pattern = re.compile(r'^(C?\d{4}[B-DF-HJ-NP-RTV-Z]{3})$')
         return pattern.match(plate) is not None
     
-
+ 
     def apply_ocr(self, roi):
         """
         Performs OCR on the given region of interest (ROI) and attempts to extract a valid license plate.
@@ -46,10 +47,10 @@ class OCRProcessor:
         Returns:
             str or None: The detected license plate string if it matches the valid format, otherwise None.
         """
-        ocr_results = self.reader.readtext(roi, allowlist='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ', paragraph=True)
+        ocr_results = self.reader.readtext(
+            roi, allowlist='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 
+            paragraph=False, text_threshold=self.min_confidence, detail=1)
         
-        # First, sort by vertical position (ymin), then by horizontal position (xmin)
-        #ocr_results_sorted = sorted(ocr_results, key=lambda x: (x[0][0][1], x[0][0][0]))
 
         # Join all detections in one string
         concatenated_plate = ''.join([detection[1].strip().replace(" ", "").upper() for detection in ocr_results])
