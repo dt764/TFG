@@ -54,7 +54,6 @@ class OCRProcessor:
 
         # Join all detections in one string
         concatenated_plate = ''.join([detection[1].strip().replace(" ", "").upper() for detection in ocr_results])
-        print(f"OCR Concatenated Result: {concatenated_plate}")
 
         # Validate if string is a license plate
         if self.is_valid_plate(concatenated_plate):
