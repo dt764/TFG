@@ -254,6 +254,7 @@ def main():
         #cv2.destroyAllWindows()
         pygame.quit()
         parking_msg_dispatcher.close()  # Close the RabbitMQ connection when finished
+        parking_to_screen_msg_dispatcher.close()
 
 if __name__ == "__main__":
     main()
