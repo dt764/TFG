@@ -1,9 +1,12 @@
 from flask import Flask
+
+from .utils.error_handlers import register_jwt_error_handlers, register_error_handlers
 from .extensions import db, bcrypt, ma, jwt
 #from .config import Config
 from .routes.auth import auth_bp
 from .routes.users import users_bp
 from .routes.history import history_bp
+from .routes.plates import plates_bp
 from .utils.middleware import middleware
 
 def create_app():
@@ -16,10 +19,17 @@ def create_app():
     ma.init_app(app)
     jwt.init_app(app)
 
+    # Register JWT error handlers
+    register_jwt_error_handlers(jwt)
+
+    # Register error handlers
+    register_error_handlers(app)
+
     # Register blueprints
     app.register_blueprint(auth_bp)
     app.register_blueprint(users_bp)
     app.register_blueprint(history_bp)
+    app.register_blueprint(plates_bp)
     app.register_blueprint(middleware)
 
     # Create database tables
