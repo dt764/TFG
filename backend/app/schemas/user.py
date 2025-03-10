@@ -1,5 +1,6 @@
+from ..utils.validators import validate_password
 from ..extensions import ma
-from marshmallow import fields, validates, ValidationError, validate
+from marshmallow import fields, validates, validate
 from ..models.user import User
 import re
 
@@ -26,25 +27,7 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
 
     @validates("password")
     def validate_password(self, value):
-        # Check minimum length
-        if len(value) < 8:
-            raise ValidationError("Password must be at least 8 characters long")
-        
-        # Check for at least one uppercase letter
-        if not re.search(r'[A-Z]', value):
-            raise ValidationError("Password must contain at least one uppercase letter")
-        
-        # Check for at least one lowercase letter
-        if not re.search(r'[a-z]', value):
-            raise ValidationError("Password must contain at least one lowercase letter")
-        
-        # Check for at least one number
-        if not re.search(r'\d', value):
-            raise ValidationError("Password must contain at least one number")
-        
-        # Check for at least one special character
-        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', value):
-            raise ValidationError("Password must contain at least one special character")
+        validate_password(value)  # Llamamos a la función reutilizable
         
 
 class CreateUserSchema(UserSchema):

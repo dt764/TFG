@@ -1,5 +1,6 @@
+from ..utils.validators import validate_plate
 from ..extensions import ma
-from marshmallow import Schema, fields, validate
+from marshmallow import Schema, fields, validates
 from .plate import PlateSchema
 from .user import UserSchema
 from ..models.history import History
@@ -14,14 +15,15 @@ class HistorySchema(ma.SQLAlchemyAutoSchema):
         include_fk = True
 
 class VerifyPlateRequestSchema(Schema):
-    plate = fields.Str(required=True, validate=[
-        validate.Length(min=6, max=7, error="Plate must be between 6 and 7 characters"),
-        validate.Regexp(r'^(C?\d{4}[B-DF-HJ-NP-RTV-Z]{3})$', error="Plate must contain only uppercase letters and numbers")
-    ])
+    plate = fields.Str(required=True)
     date = fields.DateTime(
         format='%Y-%m-%dT%H:%M:%SZ',
         missing=lambda: datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
     )
+
+    @validates('plate')
+    def validate_plate_field(self, value):
+        validate_plate(value)
 
 class VerifyPlateResponseSchema(Schema):
     allowed = fields.Boolean(required=True)
