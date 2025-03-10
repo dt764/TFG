@@ -45,6 +45,15 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
         # Check for at least one special character
         if not re.search(r'[!@#$%^&*(),.?":{}|<>]', value):
             raise ValidationError("Password must contain at least one special character")
+        
+
+class CreateUserSchema(UserSchema):
+    plates = fields.List(fields.Str(validate=validate.Regexp(r'^(C?\d{4}[B-DF-HJ-NP-RTV-Z]{3})$', 
+                        error="Invalid plate format. Plates must be 6-7 characters long and contain only uppercase letters and numbers.")))
+    class Meta(UserSchema.Meta):
+        exclude = ("id", "password_hash", "role", "histories")
 
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
+create_user_schema = CreateUserSchema(exclude=("id",))
+update_user_schema = UserSchema(partial=True)  # para permitir campos opcionales
