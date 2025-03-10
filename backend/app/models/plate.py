@@ -1,14 +1,10 @@
 from ..extensions import db
-import re
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 class Plate(db.Model):
-    """Vehicle plate model linked to a user"""
-    plate = db.Column(db.String(20), primary_key=True)  
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    user = db.relationship('User', back_populates='plates')
+    __tablename__ = "plate"
 
-    def __init__(self, plate, user):
-        if not re.match(r'^[A-Z0-9]{6,7}$', plate):  # Plate format validation
-            raise ValueError("Invalid plate format")
-        self.plate = plate
-        self.user = user
+    plate: Mapped[str] = mapped_column(db.String(20), primary_key=True)
+    user_id: Mapped[int] = mapped_column(db.ForeignKey('user.id'), nullable=False)
+    user: Mapped["User"] = relationship("User", back_populates="plates")
+
