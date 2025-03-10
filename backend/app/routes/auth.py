@@ -10,7 +10,9 @@ auth_bp = Blueprint('auth', __name__)
 @auth_bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
-    user = User.query.filter_by(email=data['email']).first()
+    
+    # Query the user directly using db.session
+    user = db.session.query(User).filter_by(email=data['email']).first()
 
     if user and user.check_password(data['password']):
         access_token = create_access_token(identity=str(user.id))
@@ -29,32 +31,30 @@ def logout():
 @auth_bp.route('/change-password', methods=['POST'])
 @jwt_required()
 def change_password():
-    try:
-        # Validate request data using schema
-        errors = change_password_schema.validate(request.get_json())
-        if errors:
-            return jsonify({"error": errors}), 400
-            
-        data = change_password_schema.load(request.get_json())
-        current_user_id = get_jwt_identity()
-        user = User.query.get(current_user_id)
-        
-        if not user:
-            return jsonify({"error": "User not found"}), 404
-            
-        if not user.check_password(data['old_password']):
-            return jsonify({"error": "Current password is incorrect"}), 401
-            
-        # Update password
-        user.set_password(data['new_password'])
-        db.session.commit()
-        
-        # Create new response and remove old token
-        response = jsonify({"message": "Password changed successfully"})
-        unset_jwt_cookies(response)
-        
-        return response
-            
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"error": "An error occurred while changing password"}), 500
+    # Validate the request data using the schema
+    change_password_schema.validate(request.get_json())
+
+    data = change_password_schema.load(request.get_json())
+    current_user_id = get_jwt_identity()
+    
+    # Get the current user using db.session
+    user = db.session.query(User).get(current_user_id)
+    
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    # Check if the current password is correct
+    if not user.check_password(data['old_password']):
+        return jsonify({"error": "Current password is incorrect"}), 401
+    
+    # Update the password within a transaction
+    user.set_password(data['new_password'])
+    
+    # Commit the changes to the database
+    db.session.commit()
+
+    # Create a new response and remove the old token
+    response = jsonify({"message": "Password changed successfully"})
+    unset_jwt_cookies(response)
+
+    return response
