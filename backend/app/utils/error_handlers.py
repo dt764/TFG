@@ -3,6 +3,7 @@ from flask_jwt_extended import JWTManager
 from marshmallow import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
 from ..extensions import db
+import traceback  # <-- necesario para capturar el traceback
 
 def register_jwt_error_handlers(jwt: JWTManager):
     @jwt.unauthorized_loader
@@ -21,15 +22,18 @@ def register_jwt_error_handlers(jwt: JWTManager):
 def register_error_handlers(app):
     @app.errorhandler(ValidationError)
     def handle_validation_error(err):
+        current_app.logger.warning(f"Validation error: {err.messages}")
         return jsonify({"error": err.messages}), 400
     
     @app.errorhandler(SQLAlchemyError)
     def handle_sqlalchemy_error(err):
         db.session.rollback()
-        current_app.logger.error(f"SQLAlchemy error: {str(err)}")
+        tb = ''.join(traceback.format_exception(type(err), err, err.__traceback__))
+        current_app.logger.error(f"SQLAlchemy error: {err}\n{tb}")
         return jsonify({"error": "Database error"}), 500
 
     @app.errorhandler(Exception)
     def handle_generic_error(err):
-        current_app.logger.error(f"Unhandled exception: {str(err)}")
+        tb = ''.join(traceback.format_exception(type(err), err, err.__traceback__))
+        current_app.logger.error(f"Unhandled exception: {err}\n{tb}")
         return jsonify({"error": "Internal server error"}), 500
