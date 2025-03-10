@@ -16,7 +16,7 @@ class HistorySchema(ma.SQLAlchemyAutoSchema):
 class VerifyPlateRequestSchema(Schema):
     plate = fields.Str(required=True, validate=[
         validate.Length(min=6, max=7, error="Plate must be between 6 and 7 characters"),
-        validate.Regexp(r'^[A-Z0-9]{6,7}$', error="Plate must contain only uppercase letters and numbers")
+        validate.Regexp(r'^(C?\d{4}[B-DF-HJ-NP-RTV-Z]{3})$', error="Plate must contain only uppercase letters and numbers")
     ])
     date = fields.DateTime(
         format='%Y-%m-%dT%H:%M:%SZ',
