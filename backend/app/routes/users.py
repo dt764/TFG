@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, current_app
+from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from ..extensions import db
 from ..models.user import User
@@ -14,8 +14,9 @@ users_bp = Blueprint('users', __name__)
 @jwt_required()
 @role_required('admin')
 def get_users():
-
-    users = db.session.execute(db.select(User)).scalars().all()
+    # Select users where role_id is not 1 (admin)
+    stmt = db.select(User).where(User.role_id != 1)
+    users = db.session.execute(stmt).scalars().all()
     return jsonify(users_schema.dump(users)), 200
 
 #---------------------------------#
