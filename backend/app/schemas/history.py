@@ -7,8 +7,7 @@ from ..models.history import History
 from datetime import datetime
 
 class HistorySchema(ma.SQLAlchemyAutoSchema):
-    registered_plate = fields.Nested(lambda: PlateSchema(only=("plate",)))
-    user = fields.Nested(lambda: UserSchema(only=("id", "first_name", "last_name", "email")))
+    #registered_plate = fields.Nested(lambda: PlateSchema(only=("plate",)))
 
     class Meta:
         model = History
