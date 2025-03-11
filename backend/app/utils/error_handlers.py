@@ -4,6 +4,7 @@ from marshmallow import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
 from ..extensions import db
 import traceback
+from werkzeug.exceptions import HTTPException
 
 def register_jwt_error_handlers(jwt: JWTManager):
     @jwt.unauthorized_loader
@@ -31,6 +32,11 @@ def register_error_handlers(app):
         tb = ''.join(traceback.format_exception(type(err), err, err.__traceback__))
         current_app.logger.error(f"SQLAlchemy error: {err}\n{tb}")
         return jsonify({"error": "Database error"}), 500
+
+    @app.errorhandler(HTTPException)
+    def handle_http_error(err):
+        current_app.logger.warning(f"HTTP error {err.code}: {err.description}")
+        return jsonify({"error": err.description}), err.code
 
     @app.errorhandler(Exception)
     def handle_generic_error(err):
