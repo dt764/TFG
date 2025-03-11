@@ -36,7 +36,13 @@ class CreateUserSchema(UserSchema):
     class Meta(UserSchema.Meta):
         exclude = ("id", "password_hash", "role", "histories")
 
+
+class UpdateUserSchema(CreateUserSchema):
+    
+    class Meta(CreateUserSchema.Meta):
+        exclude = ("id", "password_hash", "role", "histories", "email")
+
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
 create_user_schema = CreateUserSchema(exclude=("id",))
-update_user_schema = UserSchema(partial=True)  # para permitir campos opcionales
+update_user_schema = UpdateUserSchema(partial=True)  # para permitir campos opcionales

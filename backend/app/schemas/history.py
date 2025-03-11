@@ -1,13 +1,10 @@
 from ..utils.validators import validate_plate
 from ..extensions import ma
 from marshmallow import Schema, fields, validates
-from .plate import PlateSchema
-from .user import UserSchema
 from ..models.history import History
 from datetime import datetime
 
 class HistorySchema(ma.SQLAlchemyAutoSchema):
-    #registered_plate = fields.Nested(lambda: PlateSchema(only=("plate",)))
 
     class Meta:
         model = History

@@ -96,31 +96,38 @@ def update_user(user_id):
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    if 'email' in data and data['email'] != user.email:
-        if db.session.execute(db.select(User).filter_by(email=data['email'])).scalar():
-            return jsonify({"error": "Email already exists"}), 400
-        user.email = data['email']
+    # Check if the user is an admin
+    if user.role.id == 1:
+        return jsonify({"error": "Cannot modify admin users"}), 403
 
     if 'first_name' in data:
         user.first_name = data['first_name']
     if 'last_name' in data:
         user.last_name = data['last_name']
 
+    # Update plates if provided
     if 'plates' in data:
-        existing_plates = [
-            # Check if any plate already exists with another user
-            plate_number for plate_number in data['plates']
-            if (plate := db.session.execute(db.select(Plate).filter_by(plate=plate_number)).scalar())
-            and plate.user_id != user_id
-        ]
-        if existing_plates:
-            return jsonify({
-                "error": "The following plates are already registered",
-                "plates": existing_plates
-            }), 400
+        # Get current user plates
+        current_plates = {plate.plate for plate in user.plates}
+        new_plates = set(data['plates'])
+        
+        # Check if any new plate is registered to another user
+        plates_to_check = new_plates - current_plates
+        if plates_to_check:
+            existing_plates = [
+                plate_number for plate_number in plates_to_check
+                if (plate := db.session.execute(db.select(Plate).filter_by(plate=plate_number)).scalar())
+                and plate.user_id != user_id
+            ]
+            if existing_plates:
+                return jsonify({
+                    "error": "The following plates are already registered to another user",
+                    "plates": existing_plates
+                }), 400
 
+        # Remove all current plates and add the new ones
         db.session.execute(db.delete(Plate).where(Plate.user_id == user_id))
-        for plate_number in data['plates']:
+        for plate_number in new_plates:
             db.session.add(Plate(plate=plate_number, user=user))
 
     db.session.commit()
@@ -133,8 +140,6 @@ def update_user(user_id):
 @role_required('admin')
 def delete_user(user_id):
     user = db.session.get(User, user_id)
-    if not user:
-        return jsonify({"error": "User not found"}), 404
 
     # Check if the user is an admin
     if user.role.name == "admin":
