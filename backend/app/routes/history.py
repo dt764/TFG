@@ -15,7 +15,7 @@ history_bp = Blueprint('history', __name__)
 @jwt_required()
 @role_required('admin')
 def get_history():
-    history_records = db.session.execute(db.select(User)).scalars().all()
+    history_records = db.session.execute(db.select(History)).scalars().all()
     return jsonify(histories_schema.dump(history_records)), 200
 
 @history_bp.route('/verify_plate', methods=['POST'])
