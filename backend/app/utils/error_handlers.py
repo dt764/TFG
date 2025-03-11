@@ -3,20 +3,20 @@ from flask_jwt_extended import JWTManager
 from marshmallow import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
 from ..extensions import db
-import traceback  # <-- necesario para capturar el traceback
+import traceback
 
 def register_jwt_error_handlers(jwt: JWTManager):
     @jwt.unauthorized_loader
     def custom_unauthorized_response(_err_str):
-        return jsonify({"error": "Acceso no autorizado"}), 401
+        return jsonify({"error": "Unauthorized access"}), 401
 
     @jwt.invalid_token_loader
     def custom_invalid_token_response(_err_str):
-        return jsonify({"error": "Token inválido"}), 401
+        return jsonify({"error": "Invalid token"}), 401
 
     @jwt.expired_token_loader
     def custom_expired_token_response(_jwt_header, _jwt_data):
-        return jsonify({"error": "Token expirado"}), 401
+        return jsonify({"error": "Token has expired"}), 401
     
 
 def register_error_handlers(app):
