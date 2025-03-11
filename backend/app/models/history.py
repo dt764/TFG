@@ -12,5 +12,4 @@ class History(db.Model):
     user_id: Mapped[Optional[int]] = mapped_column(db.ForeignKey('user.id'), nullable=True)
     allowed: Mapped[bool] = mapped_column(nullable=False)
 
-    registered_plate: Mapped["Plate"] = relationship('Plate', primaryjoin="History.plate==Plate.plate", foreign_keys=[plate], viewonly=True)
     user: Mapped["User"] = relationship(back_populates='histories')
