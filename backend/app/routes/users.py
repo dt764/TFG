@@ -135,6 +135,10 @@ def delete_user(user_id):
     if not user:
         return jsonify({"error": "User not found"}), 404
 
+    # Check if the user is an admin
+    if user.role.name == "admin":
+        return jsonify({"error": "Cannot delete admin users"}), 403
+
     db.session.delete(user)
     db.session.commit()
     return jsonify({"message": "User deleted successfully."}), 200
