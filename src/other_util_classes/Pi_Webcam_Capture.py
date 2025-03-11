@@ -1,71 +1,71 @@
 from picamera2 import Picamera2
-import numpy as np
 
-class WebcamCapture :
-    def __init__ ( self ) :
+class WebcamCapture:
+    def __init__(self):
         """
-        Initializes the WebcamCapture object and fetches camera modes .
+        Initializes the WebcamCapture object and fetches camera modes.
         """
         self.camera = Picamera2()
-        self.camera_modes = self.camera.sensor_modes 
+        self.camera_modes = self.camera.sensor_modes
         self.active = False
 
-    def get_available_resolutions ( self ) :
+    def show_available_configurations(self):
         """
-        Prints and returns the list of supported resolutions from the stored
-        camera modes .
+        Prints and returns the list of supported sensor configurations.
 
-        Returns :
-            list of tuple : A list of tuples representing available
-            resolutions .
+        Returns:
+            list of dict: A list of dictionaries representing available sensor modes.
         """
-        try :
-            resolutions =  [(mode["size"][0] , mode["size"][1]) for mode in self.camera_modes]
-            print("Available Resolutions : ")
-            for index , resolution in enumerate ( resolutions ) :
-                print(f" { index }: { resolution [0]} x { resolution [1]}")
+        try:
+            print("Available Camera Configurations:")
+            for index, mode in enumerate(self.camera_modes):
+                print(f"\nConfiguration {index}:")
+                for key, value in mode.items():
+                    print(f"  {key}: {value}")
         except Exception as e:
-            print()
+            print(f"Error getting configurations: {e}")
+            return []
 
-
-    def start(self, resolution_index=0) :
+    def start(self, configuration_index=0):
         """
-        Starts the camera in video mode with the selected resolution by index .
+        Starts the camera using the full configuration of the selected sensor mode.
 
-        Args :
-            resolution_index ( int ) : Index of the resolution from
-            available_resolutions .
+        Args:
+            configuration_index (int): Index of the sensor configuration from available options.
 
-        Raises :
-            ValueError : If the resolution_index is out of range .
+        Raises:
+            ValueError: If the configuration_index is out of range.
         """
-        if not (0 <= resolution_index < len (self.camera_modes)):
-            raise ValueError(f"Invalid resolution index { resolution_index }. Valid indices are 0 to  { len(self.camera_modes)- 1}.")
-        resolution = self . camera_modes [ resolution_index ][ " size " ]
-        configuration = self . camera . create_video_configuration ()
-        configuration [ " main " ][ " size " ] = resolution
+        if not (0 <= configuration_index < len(self.camera_modes)):
+            raise ValueError(f"Invalid configuration index {configuration_index}. Valid indices are 0 to {len(self.camera_modes) - 1}.")
+
+        selected_mode = self.camera_modes[configuration_index]
+        configuration = self.camera.create_video_configuration(sensor={"mode": selected_mode})
+
         self.camera.configure(configuration)
-        self.camera.start ()
+        self.camera.start()
         self.active = True
-        print(f" Camera started in video mode with resolution { resolution}.")
+        print(f"\nCamera started with configuration {configuration_index}:")
+        for key, value in selected_mode.items():
+            print(f"  {key}: {value}")
 
-    def get_frame (self) :
+    def get_frame(self):
         """
-        Captures a single frame from the video stream .
-        
-        Returns :
-            np.ndarray : Captured frame as a NumPy array , or None on error .
+        Captures a single frame from the video stream.
+
+        Returns:
+            np.ndarray: Captured frame as a NumPy array, or None on error.
         """
-        if not self.active :
-            raise RuntimeError ("Camera is not active.")
-        frame = self.camera.capture_array ()
+        if not self.active:
+            raise RuntimeError("Camera is not active.")
+        frame = self.camera.capture_array()
         return frame
 
-    def release (self):
+    def release(self):
         """
-        Releases the camera and stops capturing .
+        Releases the camera and stops capturing.
         """
-        if self.active :
+        if self.active:
             self.camera.stop()
             self.active = False
             print("Camera stopped.")
