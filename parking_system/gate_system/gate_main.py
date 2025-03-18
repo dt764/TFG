@@ -1,14 +1,15 @@
 import sys
 import os
-import logging
-import logging.config
-import yaml
-import pathlib
 import json
 
-# Agrega el directorio raíz del proyecto al sys.path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from communication.msg_disp_factory import MsgDispatcherFactory
+# Add the project root directory to the sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
+from parking_system.base_config import BaseConfig
+from parking_system.communication.amqp_msg import AMQP_Msg_Disp
+from logging_module.logger_setup import setup_logger
+
+
 
 def change_door_state(state):
     print(state)
@@ -31,8 +32,8 @@ def gate_msg_handler(message):
 
     msg_json = json.loads(message.decode("utf-8"))
 
-    is_allowed = msg_json.get("pertenece")
-    matricula = msg_json.get("matricula")
+    is_allowed = msg_json.get("allowed")
+    matricula = msg_json.get("plate")
 
     change_door_state(is_allowed)
     
@@ -40,8 +41,8 @@ def gate_msg_handler(message):
     # Make the reply for the gate
 
     reply_dict = {
-        "matricula": matricula,
-        "permitido": is_allowed
+        "plate": matricula,
+        "allowed": is_allowed
   
     }
 
@@ -50,23 +51,18 @@ def gate_msg_handler(message):
     return json.dumps(reply_dict)
 
 def main():
-
-    script_dir = pathlib.Path(__file__).parent.absolute()
-    logger_path = script_dir / './logger_config.yaml'
-
-    # Cargar la configuración del archivo YAML
-    with open(logger_path, "r") as f:
-        config = yaml.safe_load(f)
-
-    logging.config.dictConfig(config)
-
-
     try:
+        setup_logger()
 
-        gate_msg_dispatcher = MsgDispatcherFactory.create_gate_dispatcher(
-            hostname='localhost',
-            msg_handler=gate_msg_handler
+        gate_msg_dispatcher = AMQP_Msg_Disp(
+            hostname=BaseConfig.AMQP_BROKER_URL,
+            port=BaseConfig.AMQP_BROKER_PORT,
+            publish_queue_name=BaseConfig.DETECTOR_QUEUE_NAME,
+            receive_queue_name=BaseConfig.GATE_QUEUE_NAME,
+            msg_handler=gate_msg_handler,
+            stop_consuming_after_received_message=False
         )
+
         
         gate_msg_dispatcher.wait_and_receive_msg()
 

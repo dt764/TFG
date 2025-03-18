@@ -1,4 +1,5 @@
-import datetime
+import argparse
+from datetime import datetime, timezone
 import pathlib
 import cv2
 import json
@@ -10,14 +11,17 @@ import logging
 import logging.config
 import yaml
 
+
 # Add project root directory to sys.path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
-from other_util_classes.license_plate_detector import LicensePlateDetector
-from other_util_classes.webcam_capture import WebcamCapture
-from other_util_classes.ocr_processor import OCRProcessor
-from communication.msg_disp_factory import MsgDispatcherFactory
-
+from logging_module.logger_setup import setup_logger
+from parking_system.communication.amqp_msg import AMQP_Msg_Disp, MQTT_Msg_Disp
+from parking_system.other_util_classes.license_plate_detector import LicensePlateDetector
+from parking_system.other_util_classes.webcam_capture import WebcamCapture
+from parking_system.other_util_classes.pi_webcam_capture import Pi_WebcamCapture
+from parking_system.other_util_classes.ocr_processor import OCRProcessor
+from parking_system import BaseConfig
 
 
 last_screen_message = None
@@ -31,8 +35,6 @@ def update_screen_state(message, dispatcher):
         dispatcher.send_msg(message)
         print(f"Screen Message: {message}")
         last_screen_message = message
-
-
 
 
 def detect_msg_handler(message):
@@ -49,12 +51,12 @@ def detect_msg_handler(message):
     """
     msg_json = json.loads(message.decode("utf-8"))
 
-    is_allowed = msg_json.get("permitido")
-    matricula = msg_json.get("matricula")
+    is_allowed = msg_json.get("allowed")
+    plate = msg_json.get("plate")
 
     reply_dict = {
-        "matricula": matricula,
-        "permitido": is_allowed
+        "plate": plate,
+        "allowed": is_allowed
   
     }
 
@@ -83,9 +85,38 @@ def main():
         parking_msg_dispatcher (MsgDispatcher): The dispatcher for sending and receiving messages for verification.
         opened_gate (bool): Indicates if the gate is open based on the last verification result.
     """
+
+    # Set up argument parser
+    parser = argparse.ArgumentParser(description='License plate detection system')
+    parser.add_argument('--show-camera-config', action='store_true',
+                help='Muestra configuraciones de la Picamea2 disponibles')
+    parser.add_argument('--camera-config-index', type=int, default=0,
+                help='Index of the Picamera2 configuration to use (must be a positive integer)')
+    
+    args = parser.parse_args()
+    
+
+    # Validate camera config index is positive
+    if args.camera_config_index < 0:
+        print("Camera configuration index must be a positive integer")
+        sys.exit(1)
+
+    if BaseConfig.USE_PI_CAMERA:
+
+        webcam = Pi_WebcamCapture()
+
+        if args.show_camera_config:
+            webcam.show_available_configurations()
+            sys.exit(0)
+    
+        webcam.set_camera_configuration(args.camera_config_index)
+
+    else:
+        webcam = WebcamCapture()
+        print("Parametros de configuración no disponibles para otras camaras distintas a Picamera2. Continuando con ejecución normal")
         
     script_dir = pathlib.Path(__file__).parent.absolute()
-    model_path = script_dir / '../../models/saved_model/license-detector_edgetpu.tflite'
+    model_path = script_dir / '../../../models/saved_model/license-detector_edgetpu.tflite'
     min_detection_confidence = 0.9
 
     # Variables to avoid logging duplicates
@@ -93,33 +124,33 @@ def main():
     last_detection_time = None
     time_last_detect_threshold = 3
 
-    script_dir = pathlib.Path(__file__).parent.absolute()
-    logger_path = script_dir / './logger_config.yaml'
-
-    # Cargar la configuración del archivo YAML
-    with open(logger_path, "r") as f:
-        config = yaml.safe_load(f)
-
-    logging.config.dictConfig(config)
-
+    setup_logger()
 
     # Create the message dispatcher for communication
-    parking_msg_dispatcher = MsgDispatcherFactory.create_detector_dispatcher(
-        hostname='localhost',
-        msg_handler=detect_msg_handler
-    )
+    parking_msg_dispatcher = AMQP_Msg_Disp(
+            hostname=BaseConfig.AMQP_BROKER_URL,
+            port=BaseConfig.AMQP_BROKER_PORT,
+            publish_queue_name=BaseConfig.VERIFIER_QUEUE_NAME,
+            receive_queue_name=BaseConfig.DETECTOR_QUEUE_NAME,
+            msg_handler=detect_msg_handler,
+            reply_to_received_message=False,
+            stop_consuming_after_received_message=True
+        )
 
     # Create the message dispatcher for communication with screen
-    parking_to_screen_msg_dispatcher =  MsgDispatcherFactory.create_parking_to_screen_msg_dispatcher(
-        hostname='localhost',
-        
-    )
+    parking_to_screen_msg_dispatcher = MQTT_Msg_Disp(
+            hostname=BaseConfig.MQTT_BROKER_URL,
+            port=BaseConfig.MQTT_BROKER_PORT,
+            publish_topic=BaseConfig.SCREEN_QUEUE_NAME,
+            sub_topic=None,
+            on_message_callback=None,
+            stop_consuming_after_received_message=True
+        )
 
     opened_gate = False
 
     # Initialize the license plate detector, webcam, and OCR processor
     detector = LicensePlateDetector(str(model_path), min_detection_confidence)
-    webcam = WebcamCapture()
     ocr_processor = OCRProcessor()
 
     # Initialize pygame for displaying the frames
@@ -162,7 +193,7 @@ def main():
                 if detected_plate:
                     print(f"Detected Plate: {detected_plate}")
 
-                    current_time = datetime.datetime.now()
+                    current_time = datetime.now(timezone.utc)
 
                     # Avoid logging the same plate if it was recently detected
                     if ((detected_plate != last_detected_plate or last_detected_plate is None)
@@ -175,12 +206,12 @@ def main():
                         last_detected_plate = detected_plate
                         print(f"{detected_plate} will be sent to verifier")
 
-                        timestamp_str = current_time.strftime('%Y%m%d_%H%M%S')
+                        timestamp_str = current_time.strftime('%Y-%m-%dT%H:%M:%SZ')
 
                         # Create the message payload
                         msg_dict = {
-                            "matricula": detected_plate,
-                            "fecha": timestamp_str
+                            "plate": detected_plate,
+                            "date": timestamp_str
                         }
 
                         # Convert the message to JSON
@@ -194,12 +225,12 @@ def main():
                         while not good_response:
                             parking_msg_dispatcher.wait_and_receive_msg()
                             response_dict = parking_msg_dispatcher.get_reply_result()
-                            print(response_dict["matricula"])
-                            print(response_dict["permitido"])
+                            print(response_dict["plate"])
+                            print(response_dict["allowed"])
                             print(detected_plate)
 
-                            if response_dict["matricula"] == detected_plate:
-                                opened_gate = response_dict["permitido"]
+                            if response_dict["plate"] == detected_plate:
+                                opened_gate = response_dict["allowed"]
                                 good_response = True
 
                             

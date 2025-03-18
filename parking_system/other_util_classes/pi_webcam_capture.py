@@ -1,6 +1,6 @@
 from picamera2 import Picamera2
 
-class WebcamCapture:
+class Pi_WebcamCapture:
     def __init__(self):
         """
         Initializes the WebcamCapture object and fetches camera modes.

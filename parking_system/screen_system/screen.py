@@ -4,9 +4,12 @@ import threading
 import os
 
 # Add project root directory to sys.path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
-from communication.msg_disp_factory import MsgDispatcherFactory
+from parking_system.base_config import BaseConfig
+from parking_system.communication.mqtt_msg import MQTT_Msg_Disp
+from logging_module.logger_setup import setup_logger
+
 
 class StatusScreen(QMainWindow):
     def __init__(self):
@@ -22,15 +25,22 @@ class StatusScreen(QMainWindow):
 
 def main():
     app = QApplication(sys.argv)
-    hostname = "localhost"
-    port=1883
     screen = StatusScreen()
+
+    setup_logger()
 
     def handle_message_update(message):
         decoded_message = message.decode()
         screen.update_status(decoded_message)
 
-    msg_dispatcher = MsgDispatcherFactory.create_screen_dispatcher(hostname, port, msg_handler=handle_message_update)
+    msg_dispatcher = MQTT_Msg_Disp(
+            hostname=BaseConfig.AMQP_BROKER_URL,
+            port=BaseConfig.AMQP_BROKER_PORT,
+            publish_topic=None,
+            sub_topic=BaseConfig.SCREEN_QUEUE_NAME,
+            on_message_callback=handle_message_update,
+            stop_consuming_after_received_message=False
+        )
     threading.Thread(target=msg_dispatcher.wait_and_receive_msg, daemon=True).start()
     
 

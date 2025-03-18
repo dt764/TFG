@@ -1,7 +1,7 @@
 from flask import Flask
 
 from .utils.error_handlers import register_jwt_error_handlers, register_error_handlers
-from .extensions import db, bcrypt, ma, jwt
+from .extensions import db, bcrypt, ma, jwt, cors
 #from .config import Config
 from .routes.auth import auth_bp
 from .routes.users import users_bp
@@ -18,6 +18,7 @@ def create_app():
     bcrypt.init_app(app)
     ma.init_app(app)
     jwt.init_app(app)
+    cors.init_app(app)
 
     # Register JWT error handlers
     register_jwt_error_handlers(jwt)

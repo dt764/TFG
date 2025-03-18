@@ -1,21 +1,18 @@
 import sys
 import os
-import logging
-import logging.config
-import yaml
-import pathlib
 import json
-import pathlib
 import requests
 import traceback
 
+# Add the project root directory to the sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
-# Agrega el directorio raíz del proyecto al sys.path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from logging_module.logger_setup import setup_logger
+from parking_system.base_config import BaseConfig
+from parking_system.communication.amqp_msg import AMQP_Msg_Disp
 
-from communication.msg_disp_factory import MsgDispatcherFactory
 
-url = "http://localhost:5000/verificar_matricula"
+url = BaseConfig.API_URL
 
 def verifier_msg_handler(message):
 
@@ -46,23 +43,17 @@ def verifier_msg_handler(message):
 
 def main():
 
-    script_dir = pathlib.Path(__file__).parent.absolute()
-    logger_path = script_dir / './logger_config.yaml'
-
-    # Cargar la configuración del archivo YAML
-    with open(logger_path, "r") as f:
-        config = yaml.safe_load(f)
-
-    logging.config.dictConfig(config)
-
-    # API URL
-
-
     try:
+        setup_logger()
 
-        verifier_msg_dispatcher = MsgDispatcherFactory.create_verifier_dispatcher(
-            hostname='localhost',
-            msg_handler=verifier_msg_handler
+        verifier_msg_dispatcher = AMQP_Msg_Disp(
+            hostname=BaseConfig.AMQP_BROKER_URL,
+            port=BaseConfig.AMQP_BROKER_PORT,
+            publish_queue_name=BaseConfig.GATE_QUEUE_NAME,
+            receive_queue_name=BaseConfig.VERIFIER_QUEUE_NAME,
+            msg_handler=verifier_msg_handler,
+            reply_to_received_message=True,
+            stop_consuming_after_received_message=False
         )
         
         verifier_msg_dispatcher.wait_and_receive_msg()
