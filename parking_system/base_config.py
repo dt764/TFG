@@ -6,6 +6,7 @@ class BaseConfig:
     SCREEN_QUEUE_NAME="screen_queue"
     GATE_QUEUE_NAME="gate_queue"
     DETECTOR_QUEUE_NAME="detector_queue"
-    VERIFICATION_QUEUE_NAME="verification_queue"
-    API_URL="http://localhost:5000/vefify_plate"
+    VERIFIER_QUEUE_NAME="verification_queue"
+    API_URL="http://localhost:5000/verify_plate"
+    API_KEY="secret-api-key"
     USE_PI_CAMERA=False
