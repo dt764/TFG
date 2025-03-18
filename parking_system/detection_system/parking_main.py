@@ -7,22 +7,18 @@ import sys
 import os
 import pygame
 import numpy as np
-import logging
-import logging.config
-import yaml
-
 
 # Add project root directory to sys.path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
 from logging_module.logger_setup import setup_logger
-from parking_system.communication.amqp_msg import AMQP_Msg_Disp, MQTT_Msg_Disp
+from parking_system.communication.amqp_msg import AMQP_Msg_Disp
+from parking_system.communication.mqtt_msg import MQTT_Msg_Disp
 from parking_system.other_util_classes.license_plate_detector import LicensePlateDetector
 from parking_system.other_util_classes.webcam_capture import WebcamCapture
-from parking_system.other_util_classes.pi_webcam_capture import Pi_WebcamCapture
+#from parking_system.other_util_classes.pi_webcam_capture import Pi_WebcamCapture
 from parking_system.other_util_classes.ocr_processor import OCRProcessor
-from parking_system import BaseConfig
-
+from parking_system.base_config import BaseConfig
 
 last_screen_message = None
 
@@ -101,6 +97,7 @@ def main():
         print("Camera configuration index must be a positive integer")
         sys.exit(1)
 
+    '''
     if BaseConfig.USE_PI_CAMERA:
 
         webcam = Pi_WebcamCapture()
@@ -115,8 +112,10 @@ def main():
         webcam = WebcamCapture()
         print("Parametros de configuración no disponibles para otras camaras distintas a Picamera2. Continuando con ejecución normal")
         
+    '''
+    webcam = WebcamCapture()
     script_dir = pathlib.Path(__file__).parent.absolute()
-    model_path = script_dir / '../../../models/saved_model/license-detector_edgetpu.tflite'
+    model_path = script_dir / '../../models/saved_model/license-detector_edgetpu.tflite'
     min_detection_confidence = 0.9
 
     # Variables to avoid logging duplicates
@@ -155,7 +154,7 @@ def main():
 
     # Initialize pygame for displaying the frames
     pygame.init()
-    webcam_feed_window = pygame.display.set_mode((frame.shape[1], frame.shape[0]))
+    webcam_feed_window = None
 
     try:
         while True:
@@ -259,6 +258,10 @@ def main():
             frame_surface = pygame.surfarray.make_surface(np.transpose(frame_rgb, (1, 0, 2)))
 
             # Initialize screen if not already initialized
+            if webcam_feed_window is None:
+                height, width = frame.shape[:2]
+                webcam_feed_window = pygame.display.set_mode((width, height))
+                pygame.display.set_caption("Detección de Matrículas")
 
             # Display the frame
             webcam_feed_window.blit(frame_surface, (0, 0))

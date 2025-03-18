@@ -34,8 +34,8 @@ def main():
         screen.update_status(decoded_message)
 
     msg_dispatcher = MQTT_Msg_Disp(
-            hostname=BaseConfig.AMQP_BROKER_URL,
-            port=BaseConfig.AMQP_BROKER_PORT,
+            hostname=BaseConfig.MQTT_BROKER_URL,
+            port=BaseConfig.MQTT_BROKER_PORT,
             publish_topic=None,
             sub_topic=BaseConfig.SCREEN_QUEUE_NAME,
             on_message_callback=handle_message_update,

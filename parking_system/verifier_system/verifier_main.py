@@ -15,7 +15,6 @@ from parking_system.communication.amqp_msg import AMQP_Msg_Disp
 url = BaseConfig.API_URL
 
 def verifier_msg_handler(message):
-
     """
     Handles messages for the verifier, checking if the license plate is allowed.
 
@@ -30,15 +29,20 @@ def verifier_msg_handler(message):
         str: A JSON-formatted string containing the plate, timestamp, and allowed status.
     """
 
-
     msg_json = json.loads(message.decode("utf-8"))
     print(msg_json)
 
-    response = requests.post(url, json=msg_json)
-    
+    headers = {
+        "API-KEY": BaseConfig.API_KEY  # Asegúrate de definir esto en tu config
+    }
+
+    response = requests.post(url, json=msg_json, headers=headers)
+
+    # Lanza excepción si el código de estado no indica éxito (2xx)
+    if not response.ok:
+        raise Exception(f"API call failed with status code {response.status_code}: {response.text}")
+
     return json.dumps(response.json())
-
-
 
 
 def main():

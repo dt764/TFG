@@ -59,6 +59,7 @@ def main():
             port=BaseConfig.AMQP_BROKER_PORT,
             publish_queue_name=BaseConfig.DETECTOR_QUEUE_NAME,
             receive_queue_name=BaseConfig.GATE_QUEUE_NAME,
+            reply_to_received_message=True,
             msg_handler=gate_msg_handler,
             stop_consuming_after_received_message=False
         )
