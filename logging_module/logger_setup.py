@@ -14,7 +14,7 @@ def setup_logger(config_path=None):
     try:
         if config_path is None:
             # Busca el YAML en el directorio raíz del proyecto
-            base_dir = pathlib.Path(__file__).parent.parent
+            base_dir = pathlib.Path(__file__).parent
             config_path = base_dir / "logger_config.yaml"
 
         with open(config_path, "r") as f:
