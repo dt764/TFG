@@ -1,7 +1,4 @@
 easyocr==1.7.1
-Flask==3.1.0
-Flask_Cors==5.0.0
-flask_marshmallow==1.2.1
 numpy==1.26.4
 opencv_contrib_python==4.10.0.84
 opencv_python==4.10.0.84
