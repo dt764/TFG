@@ -25,5 +25,5 @@ def validate_password(value):
 
 def validate_plate(value):
     # Validar el formato de la matrícula (6-7 caracteres, solo letras mayúsculas y números)
-    if not re.match(r'^(C?\d{4}[B-DF-HJ-NP-RTV-Z]{3})$', value):
+    if not re.match(r'^(C?\d{4}[B-DF-HJ-NP-RSTV-Z]{3})$', value):
         raise ValidationError('Invalid plate format. Must be 6-7 characters long and contain only uppercase letters and numbers.')

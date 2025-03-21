@@ -30,7 +30,7 @@ class OCRProcessor:
             bool: True if the plate matches the defined format, otherwise False.
         """
         # Define a regex pattern for the license plate format: 4 numeric characters followed by 3 alphabetic characters
-        pattern = re.compile(r'^(C?\d{4}[B-DF-HJ-NP-RTV-Z]{3})$')
+        pattern = re.compile(r'^(C?\d{4}[B-DF-HJ-NP-RSTV-Z]{3})$')
         return pattern.match(plate) is not None
     
  
@@ -48,12 +48,15 @@ class OCRProcessor:
             str or None: The detected license plate string if it matches the valid format, otherwise None.
         """
         ocr_results = self.reader.readtext(
-            roi, allowlist='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 
+            roi, allowlist='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ', 
             paragraph=False, text_threshold=self.min_confidence, detail=1)
         
+        #print(ocr_results)
 
         # Join all detections in one string
         concatenated_plate = ''.join([detection[1].strip().replace(" ", "").upper() for detection in ocr_results])
+
+        #print(concatenated_plate)
 
         # Validate if string is a license plate
         if self.is_valid_plate(concatenated_plate):

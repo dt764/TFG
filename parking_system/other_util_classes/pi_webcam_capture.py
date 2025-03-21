@@ -11,20 +11,27 @@ class Pi_WebcamCapture:
 
     def show_available_configurations(self):
         """
-        Prints and returns the list of supported sensor configurations.
+        Prints and returns the list of supported sensor configurations (Resolution, FPS, and Crop Limits).
+        It avoids showing duplicate resolutions.
 
         Returns:
             list of dict: A list of dictionaries representing available sensor modes.
         """
-        try:
-            print("Available Camera Configurations:")
-            for index, mode in enumerate(self.camera_modes):
+        seen_resolutions = set()  # Para almacenar resoluciones únicas
+        print("Available Camera Configurations (Resolution, FPS, and Crop Limits):")
+        
+        for index, mode in enumerate(self.camera_modes):
+            resolution = mode.get("size", (640, 480))
+            fps = mode.get("fps", 0)
+            crop_limits = mode.get("crop_limits", "N/A")
+            
+            # Evitar que se muestren resoluciones duplicadas
+            if resolution not in seen_resolutions:
+                seen_resolutions.add(resolution)
                 print(f"\nConfiguration {index}:")
-                for key, value in mode.items():
-                    print(f"  {key}: {value}")
-        except Exception as e:
-            print(f"Error getting configurations: {e}")
-            return []
+                print(f"  Resolution: {resolution}")
+                print(f"  FPS: {fps}")
+                print(f"  Crop Limits: {crop_limits}")
 
     def start(self, configuration_index=0):
         """
@@ -40,14 +47,21 @@ class Pi_WebcamCapture:
             raise ValueError(f"Invalid configuration index {configuration_index}. Valid indices are 0 to {len(self.camera_modes) - 1}.")
 
         selected_mode = self.camera_modes[configuration_index]
-        configuration = self.camera.create_video_configuration(sensor={"mode": selected_mode})
+        resolution = selected_mode.get("size", (640, 480))
+
+        # Creamos configuración personalizada basada en la resolución seleccionada
+        configuration = self.camera.create_video_configuration(
+            main={"size": resolution, "format": "RGB888"}
+        )
 
         self.camera.configure(configuration)
         self.camera.start()
         self.active = True
+
         print(f"\nCamera started with configuration {configuration_index}:")
-        for key, value in selected_mode.items():
-            print(f"  {key}: {value}")
+        print(f"  Resolution: {resolution}")
+        print(f"  FPS: {selected_mode.get('fps', 'N/A')}")
+        print(f"  Crop Limits: {selected_mode.get('crop_limits', 'N/A')}")
 
     def get_frame(self):
         """
@@ -69,3 +83,4 @@ class Pi_WebcamCapture:
             self.camera.stop()
             self.active = False
             print("Camera stopped.")
+

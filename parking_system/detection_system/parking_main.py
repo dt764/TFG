@@ -7,6 +7,7 @@ import sys
 import os
 import pygame
 import numpy as np
+import traceback
 
 # Add project root directory to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
@@ -16,21 +17,27 @@ from parking_system.communication.amqp_msg import AMQP_Msg_Disp
 from parking_system.communication.mqtt_msg import MQTT_Msg_Disp
 from parking_system.other_util_classes.license_plate_detector import LicensePlateDetector
 from parking_system.other_util_classes.webcam_capture import WebcamCapture
-#from parking_system.other_util_classes.pi_webcam_capture import Pi_WebcamCapture
 from parking_system.other_util_classes.ocr_processor import OCRProcessor
-from parking_system.base_config import BaseConfig
+from parking_system.base_config import BaseConfig, ScreenMessageKey
 
-last_screen_message = None
+last_code = None
 
-def update_screen_state(message, dispatcher):
+def update_screen_state(code, dispatcher, plate=None):
     """
     Sends a message to the screen only if it differs from the last sent message.
     """
-    global last_screen_message
-    if message != last_screen_message:
+
+    global last_code
+
+    message_dict = {"state_code": code}
+    if plate is not None:
+        message_dict["plate"] = plate
+    message = json.dumps(message_dict)
+    
+    if code != last_code:
         dispatcher.send_msg(message)
         print(f"Screen Message: {message}")
-        last_screen_message = message
+        last_code = code
 
 
 def detect_msg_handler(message):
@@ -96,9 +103,10 @@ def main():
     if args.camera_config_index < 0:
         print("Camera configuration index must be a positive integer")
         sys.exit(1)
-
-    '''
+    
     if BaseConfig.USE_PI_CAMERA:
+    
+        from parking_system.other_util_classes.pi_webcam_capture import Pi_WebcamCapture
 
         webcam = Pi_WebcamCapture()
 
@@ -106,14 +114,12 @@ def main():
             webcam.show_available_configurations()
             sys.exit(0)
     
-        webcam.set_camera_configuration(args.camera_config_index)
+        webcam.start(args.camera_config_index)
 
     else:
         webcam = WebcamCapture()
         print("Parametros de configuración no disponibles para otras camaras distintas a Picamera2. Continuando con ejecución normal")
-        
-    '''
-    webcam = WebcamCapture()
+  
     script_dir = pathlib.Path(__file__).parent.absolute()
     model_path = script_dir / '../../models/saved_model/license-detector_edgetpu.tflite'
     min_detection_confidence = 0.9
@@ -163,17 +169,17 @@ def main():
             
             # Perform license plate detection
             roi, ymin, xmin, ymax, xmax, confidence = detector.detect_license_plate(frame)
-
+            
+            #print(f"Dimensiones del frame: {frame.shape}")
 
             cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
 
             if roi is not None:
 
                 #Send message that a plate has been detected
-                #update_screen_state("Matrícula detectada, aplicando la lectura", parking_to_screen_msg_dispatcher)
+                #update_screen_state(ScreenMessageKey.READING, parking_to_screen_msg_dispatcher)
 
                 # Draw the detection label
-                print("New Frame with detection:")
                 object_name = 'license'
                 label = '%s: %d%%' % (object_name, int(confidence * 100))
                 labelSize, baseLine = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)
@@ -199,7 +205,7 @@ def main():
                         or ((current_time - last_detection_time).total_seconds() >  time_last_detect_threshold)):
                         
                         #Send message that license has been read
-                        update_screen_state(f"Verificando matrícula {detected_plate}", parking_to_screen_msg_dispatcher)
+                        update_screen_state(ScreenMessageKey.VERIFYING, parking_to_screen_msg_dispatcher, plate=detected_plate)
 
                         # Update the last detected plate
                         last_detected_plate = detected_plate
@@ -239,23 +245,30 @@ def main():
                         
                     if opened_gate:
                             #Send message that car is allowed
-                        update_screen_state(f"Matricula {detected_plate} permitida", parking_to_screen_msg_dispatcher)
+                        update_screen_state(ScreenMessageKey.ALLOWED, parking_to_screen_msg_dispatcher, plate=detected_plate)
                         print("Allowed to enter")
                     else:
                         print("Denied to enter")
                         #Send message that car is not allowed
-                        update_screen_state(f"Matricula {detected_plate} denegada", parking_to_screen_msg_dispatcher)
-
-                    # Update the last detection time
+                        update_screen_state(ScreenMessageKey.DENIED, parking_to_screen_msg_dispatcher, plate=detected_plate)
+                    
+                     # Update the last detection time
                     last_detection_time = current_time
                     last_detected_plate = detected_plate
+                    
+                else:
+                     update_screen_state(ScreenMessageKey.OCR_FAIL, parking_to_screen_msg_dispatcher)
+
+                   
             else:
                 #Send message to screen that is waiting for license plate
-               update_screen_state("Esperando matricula", parking_to_screen_msg_dispatcher)
+               update_screen_state(ScreenMessageKey.DETECTING, parking_to_screen_msg_dispatcher)
 
             # Convert frame to RGB for pygame
             frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             frame_surface = pygame.surfarray.make_surface(np.transpose(frame_rgb, (1, 0, 2)))
+            
+            #frame_surface = pygame.surfarray.make_surface(np.transpose(frame, (1, 0, 2)))
 
             # Initialize screen if not already initialized
             if webcam_feed_window is None:
@@ -280,7 +293,8 @@ def main():
     except KeyboardInterrupt:
         print("Interrupción manual detectada. Cerrando el programa...")
     except Exception as e:
-         print(f"Error inesperado durante el programa: {e}")      
+        print("Error inesperado durante el programa:")
+        traceback.print_exc()
 
     finally:
         # Release resources and close the application
