@@ -20,10 +20,13 @@ class BaseConfig:
     DETECTOR_QUEUE_NAME="detector_queue"
     VERIFIER_QUEUE_NAME="verification_queue"
 
+    DETECTION_MIN_CONFIDENCE=0.9
+    OCR_MIN_CONFIDENCE=0.9
+
     API_URL="http://localhost:5000/verify_plate"
     API_KEY="secret-api-key"
 
-    USE_PI_CAMERA=True
+    USE_PI_CAMERA=False
 
     SCREEN_MESSAGES = {
         ScreenMessageKey.DETECTING: "Esperando matrícula",

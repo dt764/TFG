@@ -123,6 +123,14 @@ def main():
     script_dir = pathlib.Path(__file__).parent.absolute()
     model_path = script_dir / '../../models/saved_model/license-detector_edgetpu.tflite'
     min_detection_confidence = 0.9
+    ocr_min_confidence = 0.9
+    
+    if BaseConfig.DETECTION_MIN_CONFIDENCE:
+       min_detection_confidence = BaseConfig.DETECTION_MIN_CONFIDENCE
+    
+    if BaseConfig.OCR_MIN_CONFIDENCE:
+         ocr_min_confidence = BaseConfig.OCR_MIN_CONFIDENCE
+     
 
     # Variables to avoid logging duplicates
     last_detected_plate = None
@@ -156,7 +164,7 @@ def main():
 
     # Initialize the license plate detector, webcam, and OCR processor
     detector = LicensePlateDetector(str(model_path), min_detection_confidence)
-    ocr_processor = OCRProcessor()
+    ocr_processor = OCRProcessor(min_confidence=ocr_min_confidence)
 
     # Initialize pygame for displaying the frames
     pygame.init()
