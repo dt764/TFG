@@ -1,45 +1,47 @@
-# TFG David Tarca: Sistema de control de acceso al parking mediante reconocimiento de matrículas basado en redes neuronales
+# Sistema de Control de Acceso al Parking mediante Reconocimiento de Matrículas
+## TFG de David Tarca: Implementación basada en Redes Neuronales
 
-Este repositorio contiene el código del proyecto de TFG para el sistema del parking. Se divide en los siguientes módulos:
+Sistema integral para la gestión automatizada de accesos a parkings mediante reconocimiento de matrículas. El proyecto integra las siguientes componentes principales:
 
-## Módulos del Sistema
+## 🌐 Frontend de Administración
+- **Tecnología**: Angular
+- **Funcionalidad**: Panel de control para gestión del parking
+- **Estado**: En desarrollo activo
 
-### Frontend de Administración (admin_frontend)
-- Proyecto en Angular para la gestión administrativa del parking
-- Estado: En desarrollo
-
-### Backend
-- Implementado con Flask
-- Instrucciones de instalación:
-    1. Instalar dependencias del `requirements.txt`
+## ⚙️ Backend API
+- **Framework**: Flask (Python)
+- **Despliegue**:
+    1. `pip install -r requirements.txt`
     2. Configurar variables de entorno
-    3. Ejecutar `run.py`
+    3. Ejecutar `python run.py`
 
-### Entrenamiento del Modelo (model-training)
-- Notebook preparado para Google Colab
-- Incluye instrucciones detalladas de uso
-- Script completo de entrenamiento del modelo
+## 🤖 Entrenamiento del Modelo
+- Notebook optimizado para Google Colab
+- Documentación detallada del proceso
+- Scripts de entrenamiento y evaluación
 
-### Módulo de Logging (logging_module)
-- Basado en el módulo logging de Python
-- Configuración mediante archivos YAML
+## 📝 Sistema de Logging
+- Implementación basada en Python logging
+- Configuración vía YAML
+- Trazabilidad completa del sistema
 
-### Sistema de Parking (Parking System)
-Incluye los siguientes subsistemas:
-- Detector
-- Verificador
-- Control de puerta
+## 🚗 Sistema Principal del Parking
+### Componentes:
+- **Detector**: Reconocimiento en tiempo real
+- **Verificador**: Validación de accesos
+- **Control de Puerta**: Automatización de barreras
 
-#### Requisitos del Sistema
-- Broker AMQP (RabbitMQ) para comunicación principal
-- Broker MQTT (Mosquitto) para comunicación detector-pantalla
-- Runtime Edge TPU para el detector
+### Requisitos del Sistema
+- RabbitMQ (AMQP) - Comunicación principal
+- Mosquitto (MQTT) - Comunicación detector-display
+- Runtime Edge TPU - Procesamiento del detector
 
-#### Configuración
-- Cada subsistema tiene su propio `main.py`
-- Configuración centralizada en `base_config`:
-    - URLs de brokers
-    - URL del backend
-    - Umbrales de confianza
-    - Otros parámetros del sistema
+### Configuración
+Gestión centralizada en `base_config`:
+- Endpoints de comunicación
+- Parámetros de backend
+- Configuración de umbrales
+- Variables del sistema
+
+
 
