@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
-import { Observable, catchError, map, of, tap } from 'rxjs';
-import { Usuario } from './interfaces/User';
-import { Historial } from './interfaces/history';
+import { Observable, catchError, map, of, tap, throwError } from 'rxjs';
+import { UpdateUser, User } from './interfaces/User';
+import { History } from './interfaces/history';
+import { environment } from '../environments/environment';
 
-const backendUrl = 'http://localhost:5000';
+const backendUrl = environment.apiUrl;
 
 @Injectable({
   providedIn: 'root'
@@ -13,50 +14,69 @@ const backendUrl = 'http://localhost:5000';
 export class ApiService {
 
   httpOptions = {
-    headers: new HttpHeaders({ 'Content-Type': 'application/json'
-    })
+    headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+    withCredentials: true
   };
+  
 
   constructor(private http: HttpClient) { }
 
-  getUsers(): Observable<Usuario[]> {
-    const url = `${backendUrl}/usuarios`;
-    return this.http.get<Usuario[]>(url).pipe(
-      catchError(this.handleError<Usuario[]>('getUsuarios', []))
+  login(credentials: { email: string, password: string }): Observable<any> {
+    const url = `${backendUrl}/login`;
+    return this.http.post(url, credentials, this.httpOptions).pipe(
+      tap(() => console.log('Login successful')),
+      catchError(this.handleError<any>('login'))
+    );
+  }
+  
+
+  getUsers(): Observable<User[]> {
+    const url = `${backendUrl}/users`;
+    return this.http.get<User[]>(url).pipe(
+      catchError(this.handleError<User[]>('getUsers', []))
     );
   }
 
-  getUsuario(id: string): Observable<Usuario> {
-    const url = `${backendUrl}/usuarios/${id}`;
-    return this.http.get<Usuario>(url).pipe(
-      catchError(this.handleError<Usuario>(`getUsuario`))
+  getUser(id: string): Observable<User> {
+    const url = `${backendUrl}/users/${id}`;
+    return this.http.get<User>(url).pipe(
+      catchError(this.handleError<User>(`getUser`))
     );
   }
 
-  updateUsuario(Usuario: Usuario) {
-    return this.http.put<Usuario>(`${backendUrl}/usuarios/${Usuario.id}`, Usuario).pipe(
-      catchError(this.handleError<Usuario>(`updateCreatedUsuario`))
+  updateUser(user: UpdateUser, id: number): Observable<User> {
+    return this.http.put<User>(`${backendUrl}/users/${id}`, user)
+    //.pipe(
+      //catchError(this.handleError<User>(`updateUser`))
+    //);
+  }
+
+  addUser(user: User): Observable<User> {
+    const url = `${backendUrl}/users`;
+    return this.http.post<User>(url, user, this.httpOptions).pipe(
+      catchError(this.handleError<User>(`addUser`))
     );
   }
 
-  addUser(user: Usuario): Observable<Usuario> {
-    const url = `${backendUrl}/usuarios`;
-    return this.http.post<Usuario>(url, user, this.httpOptions).pipe(
-      catchError(this.handleError<Usuario>(`addUser`))
+  getHistory(): Observable<History[]> {
+    const url = `${backendUrl}/history`;
+    return this.http.get<History[]>(url).pipe(
+      catchError(this.handleError<History[]>('getHistory', []))
     );
   }
 
-  getHistorial(): Observable<Historial[]> {
-    const url = `${backendUrl}/historial`;
-    return this.http.get<Historial[]>(url).pipe(
-      catchError(this.handleError<Historial[]>('getHistorial', []))
+  getUserHistory(id: string): Observable<History[]> {
+    const url = `${backendUrl}/users/${id}/history`;
+    return this.http.get<History[]>(url).pipe(
+      catchError(this.handleError<History[]>('getHistoryUser', []))
     );
   }
 
-  getHistorialUsuario(id: string): Observable<Historial[]> {
-    const url = `${backendUrl}/usuarios/${id}/historial`;
-    return this.http.get<Historial[]>(url).pipe(
-      catchError(this.handleError<Historial[]>('getHistorialUsuario', []))
+  logout(): Observable<any> {
+    const url = `${backendUrl}/logout`;
+    return this.http.post(url, {}, this.httpOptions).pipe(
+      tap(() => console.log('Logout successful')),
+      catchError(this.handleError<any>('logout'))
     );
   }
 
@@ -72,6 +92,11 @@ private handleError<T>(operation = 'operation', result?: T) {
 
     // TODO: send the error to remote logging infrastructure
     console.error(error); // log to console instead
+
+    // Si es un error de validación, lo propagamos para que lo maneje el componente
+    if (error.status === 400 && error.error.errors) {
+      return throwError(() => error);
+    }
 
     // Let the app keep running by returning an empty result.
     return of(result as T);
