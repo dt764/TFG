@@ -1,65 +1,64 @@
-import easyocr
+from paddleocr import PaddleOCR
 import re
+import numpy as np
 
 class OCRProcessor:
     """
-    A class to handle OCR (Optical Character Recognition) processing for detecting and validating license plates.
-
-    Attributes:
-        reader (easyocr.Reader): An EasyOCR reader object used for processing OCR.
-    """
+    A class to handle OCR (Optical Character Recognition) processing for detecting and validating license plates
+    using PaddleOCR.
     
+    Attributes:
+        ocr (PaddleOCR): An instance of PaddleOCR for text detection.
+    """
+
     def __init__(self, min_confidence=0.9):
         """
-        Initializes an OCRProcessor object, creating an EasyOCR reader for English language detection.
+        Initializes the OCRProcessorPaddle with English OCR model.
         """
         self.min_confidence = min_confidence
-        self.reader = easyocr.Reader(['en'])
+        self.ocr = PaddleOCR(use_angle_cls=True, lang='en')  # Initialize with English model
 
     def is_valid_plate(self, plate):
         """
         Checks whether the given string matches the format of a valid license plate.
 
-        The valid format is defined as four numeric characters followed by three uppercase alphabetic characters,
-        excluding vowels to avoid confusion (for example, 'A', 'E', 'I', 'O', and 'U' are excluded).
+        Format: 4 numeric characters followed by 3 uppercase alphabetic characters excluding vowels.
 
         Args:
             plate (str): The license plate string to validate.
 
         Returns:
-            bool: True if the plate matches the defined format, otherwise False.
+            bool: True if the plate matches the format, False otherwise.
         """
-        # Define a regex pattern for the license plate format: 4 numeric characters followed by 3 alphabetic characters
         pattern = re.compile(r'^(C?\d{4}[B-DF-HJ-NP-RSTV-Z]{3})$')
         return pattern.match(plate) is not None
-    
- 
+
     def apply_ocr(self, roi):
         """
-        Performs OCR on the given region of interest (ROI) and attempts to extract a valid license plate.
-
-        The method uses EasyOCR to detect text within the image, sorts the text by the horizontal position (xmin),
-        concatenates the detected characters, and validates the resulting string as a license plate.
+        Applies OCR to the input image and attempts to extract a valid license plate string.
 
         Args:
-            roi (numpy.ndarray): The image region to apply OCR on.
+            roi (numpy.ndarray): Image region (as numpy array) to apply OCR on.
 
         Returns:
-            str or None: The detected license plate string if it matches the valid format, otherwise None.
+            str or None: The detected license plate string if valid, otherwise None.
         """
-        ocr_results = self.reader.readtext(
-            roi, allowlist='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ', 
-            paragraph=False, text_threshold=self.min_confidence, detail=1)
+        result = self.ocr.ocr(roi, cls=True)
         
-        #print(ocr_results)
+        text_candidates = []
 
-        # Join all detections in one string
-        concatenated_plate = ''.join([detection[1].strip().replace(" ", "").upper() for detection in ocr_results])
+        if not result[0]:
+            return None
 
-        #print(concatenated_plate)
+        for line in result[0]:
+            text, confidence = line[1][0], line[1][1]
+            if confidence >= self.min_confidence:
+                text_candidates.append(text.strip().replace(" ", "").upper())
+        
 
-        # Validate if string is a license plate
+        concatenated_plate = ''.join(text_candidates)
+
         if self.is_valid_plate(concatenated_plate):
             return concatenated_plate
-        
+
         return None
