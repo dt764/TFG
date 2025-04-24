@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { Usuario } from '../interfaces/User';
+import { UpdateUser, User } from '../interfaces/User';
 import { ActivatedRoute } from '@angular/router';
 import { ApiService } from '../api.service';
 import { NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Historial } from '../interfaces/history';
+import { History } from '../interfaces/history';
 
 @Component({
   selector: 'app-user-detail',
@@ -13,10 +13,17 @@ import { Historial } from '../interfaces/history';
   templateUrl: './user-detail.component.html',
   styleUrl: './user-detail.component.scss'
 })
+
 export class UserDetailComponent {
 
-  usuario: Usuario | undefined;
-  historial_usuario: Historial[] | undefined
+  user: User | undefined;
+  userHistory: History[] = [];
+  updateUser: UpdateUser | undefined;
+
+  formErrors: { [key: string]: string[] } = {};
+
+  successMessage: string | null = null;
+
   
   constructor(
     private route: ActivatedRoute,
@@ -24,31 +31,66 @@ export class UserDetailComponent {
   ) {}
 
   ngOnInit(): void {
-    this.getUsuario();
-    this.getHistorialUsuario();
+    this.getUser();
+    this.getHistoryUser();
   }
   
-  getUsuario(): void {
+  getUser(): void {
     const id = String(this.route.snapshot.paramMap.get('id'));
-    this.apiService.getUsuario(id)
-      .subscribe(usuario => {
-        this.usuario = usuario;
+    this.apiService.getUser(id)
+      .subscribe(User => {
+        this.user = User;
       });
   }
 
-  getHistorialUsuario(): void {
+  getHistoryUser(): void {
     const id = String(this.route.snapshot.paramMap.get('id'));
-    this.apiService.getHistorialUsuario(id)
-      .subscribe(historial_usuario=> {
-        this.historial_usuario = historial_usuario;
+    this.apiService.getUserHistory(id)
+      .subscribe(userHistory => {
+        this.userHistory = userHistory;
       });
   }
 
   save(): void {
-    if (this.usuario) {
-      this.apiService.updateUsuario(this.usuario)
-        .subscribe();
+    if (this.user) {
+      this.updateUser = {
+        first_name: this.user.first_name,
+        last_name: this.user.last_name,
+        plates: this.user.plates
+      };
+      this.apiService.updateUser(this.updateUser, this.user.id).subscribe({
+        next: (user) => {
+          this.user = user;
+          this.clearErrors();
+          this.successMessage = 'Datos guardados correctamente ✅';
+  
+          // Borra el mensaje después de 3 segundos (opcional)
+          setTimeout(() => {
+            this.successMessage = null;
+          }, 3000);
+        },
+        error: (err) => {
+          if (err.status === 400 /*&& err.error.errors*/) {
+            this.handleValidationErrors(err.error.error);
+            console.log('Error de validación:', err.error.error);
+          }
+        }
+      });
     }
   }
+
+  handleValidationErrors(errors: any): void {
+    this.formErrors = {}; // Limpiamos antes de agregar nuevos errores
+    for (let key in errors) {
+      if (errors.hasOwnProperty(key)) {
+        this.formErrors[key] = errors[key]; // Asumimos que `errors[key]` es un array de strings
+      }
+    }
+  }
+  
+  clearErrors(): void {
+    this.formErrors = {}; // Limpiamos los errores cuando la actualización es exitosa
+  }
+  
 
 }

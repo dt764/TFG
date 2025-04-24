@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Usuario } from '../interfaces/User';
+import { User } from '../interfaces/User';
 import { ApiService } from '../api.service';
 import { NgFor } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -16,7 +16,7 @@ import { RouterLink } from '@angular/router';
 })
 export class UsersComponent {
 
-  users: Usuario[] = [];
+  users: User[] = [];
 
   constructor(private apiService: ApiService) { }
 

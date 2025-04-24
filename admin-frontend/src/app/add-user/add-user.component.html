@@ -4,25 +4,21 @@
     <ul>
         <li>
             <label for="name">Nombre:</label>
-            <input type="text" id="name" [(ngModel)]="newUser.nombre" name="name" required>
+            <input type="text" id="name" [(ngModel)]="newUser.first_name" name="name" required>
         </li>
         <li>
             <label for="apellidos">Apellidos:</label>
-            <input type="text" id="apellidos" [(ngModel)]="newUser.apellidos" name="apellidos" required>
+            <input type="text" id="apellidos" [(ngModel)]="newUser.last_name" name="apellidos" required>
         </li>
         <li>
             <label for="apellidos">Correo:</label>
-            <input type="text" id="apellidos" [(ngModel)]="newUser.correo" name="email" required>
+            <input type="text" id="apellidos" [(ngModel)]="newUser.email" name="email" required>
         </li>
         <ul>
             <h3>Matrículas</h3>
-            <li>
-                <label for="matricula1">Matrícula 1:</label>
-                <input type="text" id="matricula1" [(ngModel)]="newUser.matricula1" name="matricula1" required>
-            </li>
-            <li>
-                <label for="imageUrl">Matrícula 2:</label>
-                <input type="text" id="matricula2" [(ngModel)]="newUser.matricula2" name="matricula2" required>
+            <li *ngFor="let plate of newUser.plates; let i = index">
+                <label [for]="'matricula' + i">Matrícula {{ i + 1 }}:</label>
+                <input type="text" id="matricula1"  [(ngModel)]="newUser.plates[i]" placeholder="0000BBB" name="matricula1" required>
             </li>
         </ul>   
     </ul>

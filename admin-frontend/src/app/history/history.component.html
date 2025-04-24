@@ -1,1 +1,14 @@
-<p>history works!</p>
+<h2>Historial de entrada</h2>
+<div class="content-container">
+  <div class="cards-container">
+    <div 
+      *ngFor="let entry of history_entries" 
+      
+      class="card">
+      
+      <span>{{entry.allowed}}</span>
+      <span>{{entry.date}}</span>
+      <a [routerLink]="'/users/' + entry.user_id">{{entry.user_id}}</a>
+    </div>
+  </div>
+</div>

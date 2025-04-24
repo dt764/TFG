@@ -7,16 +7,11 @@
         routerLink="/users/{{user.id}}"
         class="">
         <span>
-            {{user.nombre}} {{user.apellidos}}
+            {{user.first_name}} {{user.last_name}}
         </span>
     </a>
     <ul>
-        <li>
-            {{user.matricula1}}
-        </li>
-        <li>
-            {{user.matricula1}}
-        </li>
+        <li *ngFor="let item of user.plates"></li>
     </ul>
   </div>
 </div>

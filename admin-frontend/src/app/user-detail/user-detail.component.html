@@ -1,33 +1,39 @@
-<h1> Detalles del usuario</h1>
+<h1> Detalles del user</h1>
 
 <div class="content-container">
-    <div *ngIf="usuario" class="content">
+    <div *ngIf="user" class="content">
         
         <div class="info-container">
-            <h2>{{usuario.nombre}} Details</h2>
+            <h2>{{user.first_name}} Details</h2>
 
             <div class="info">
                 <h3>Info</h3>
                 <div class="nombre-container">
-                    <label for="usuario-nombre"> Nombre: </label>
-                    <input id="usuario-nombre" [(ngModel)]="usuario.nombre" placeholder="nombre">
-                </div>
-                <div class="apellidos-container">
-                    <label for="usuario-apellidos"> Apellidos: </label>
-                    <input id="usuario-apellidos" [(ngModel)]="usuario.apellidos" placeholder="apellidos">
-                </div>
+                    <label for="user-nombre"> Nombre: </label>
+                    <input id="user-nombre" [(ngModel)]="user.first_name" placeholder="nombre" />
+                    <div *ngIf="formErrors['first_name']" class="error-message">
+                      <div *ngFor="let msg of formErrors['first_name']">{{ msg }}</div>
+                    </div>
+                  </div>
+                  <div class="apellidos-container">
+                    <label for="user-apellidos"> Apellidos: </label>
+                    <input id="user-apellidos" [(ngModel)]="user.last_name" placeholder="apellidos" />
+                    <div *ngIf="formErrors['last_name']" class="error-message">
+                      <div *ngFor="let msg of formErrors['last_name']">{{ msg }}</div>
+                    </div>
+                  </div>
             </div>
         
             <div class="info">
                 <h3>Matriculas</h3>
                 <ul>
-                    <li>
-                        <input id="matricula1" type="text" [(ngModel)]="usuario.matricula1" placeholder="0000BBB">
-                    </li>
-                    <li>
-                        <input id="matricula2" [(ngModel)]="usuario.matricula2" placeholder="0000BBB">
+                    <li *ngFor="let plate of user.plates; let i = index">
+                    <input type="text" [(ngModel)]="user.plates[i]" placeholder="0000BBB" />
                     </li>
                 </ul>
+                <div *ngIf="formErrors['plates']" class="error-message">
+                    <div *ngFor="let msg of formErrors['plates']">{{ msg }}</div>
+                </div>
             </div>
             <div class="buttons-container">
                 <button type="button" (click)="save()">save</button>
@@ -36,20 +42,21 @@
     </div>
     <table>
         <tr>
-            <th>Nombre</th>
-            <th>Edad</th>
-            <th>Ciudad</th>
+            <th>Matricula</th>
+            <th>Fecha</th>
         </tr>
-        <tr *ngFor="let historial of historial_usuario">
+        <tr *ngFor="let entry of userHistory">
             <td>
-                {{historial.matricula}}
+                {{entry.plate}}
             </td>
             <td>
-                {{historial.fecha}}
-            </td>
-            <td>
-                {{historial.permitido}}
+                {{entry.date}}
             </td>
         </tr>
     </table>
+    <!-- Mensaje de éxito -->
+    <div *ngIf="successMessage" class="success-message">
+        {{ successMessage }}
+    </div>
+  
 </div>
