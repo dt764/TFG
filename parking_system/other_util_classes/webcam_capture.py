@@ -1,18 +1,11 @@
 import cv2
+import threading
+import time
 
 class WebcamCapture:
     """
-    A class for capturing video frames from a webcam.
-
-    This class provides a simple interface to access the webcam, capture frames, and release
-    the camera resource when done. It uses OpenCV's VideoCapture for video stream handling.
-
-    Attributes:
-        cap (cv2.VideoCapture): The video capture object used to interface with the webcam.
-
-    Methods:
-        get_frame(): Captures a frame from the webcam.
-        release(): Releases the webcam resource and closes any OpenCV windows.
+    A class for capturing video frames from a webcam with buffering to ensure
+    that frames are captured only when needed.
     """
 
     def __init__(self, source=0):
@@ -25,28 +18,57 @@ class WebcamCapture:
                                  be a path to a video file or stream URL.
         """
         self.cap = cv2.VideoCapture(source)
+        if not self.cap.isOpened():
+            raise RuntimeError("Failed to open video source")
+        
+        # Buffer to store the most recent frame
+        self.frame = None
+        self.lock = threading.Lock()
+        self.running = True
 
-    def get_frame(self):
+        # Start the capture thread
+        self.capture_thread = threading.Thread(target=self._capture_frames)
+        self.capture_thread.start()
+
+    def _capture_frames(self):
         """
-        Captures a frame from the webcam.
+        Captures frames from the webcam continuously in a separate thread to ensure
+        that the latest frame is always available for processing.
+        """
+        while self.running:
+            ret, frame = self.cap.read()
+            if ret:
+                with self.lock:
+                    self.frame = frame
+            time.sleep(0.01)  # Adjust this sleep time to control capture rate
+
+    def get_frame(self, process_frame=None):
+        """
+        Returns the most recent frame from the webcam. If a frame is being processed,
+        waits for the frame to be available.
+
+        Args:
+            process_frame (function, optional): A function to process the captured frame (e.g., convert to grayscale).
 
         Returns:
-            frame (numpy.ndarray): The captured frame from the webcam.
-
-        Raises:
-            RuntimeError: If a frame could not be grabbed from the webcam.
+            frame (numpy.ndarray): The captured (and optionally processed) frame from the webcam.
         """
-        ret, frame = self.cap.read()
-        if not ret:
-            raise RuntimeError("Failed to grab frame")
+        with self.lock:
+            frame = self.frame
+
+        if frame is None:
+            raise RuntimeError("No frame captured yet")
+
+        if process_frame:
+            frame = process_frame(frame)
+
         return frame
 
     def release(self):
         """
         Releases the webcam resource and closes any OpenCV windows.
-
-        This method should be called when the webcam is no longer needed to free up the
-        camera and avoid resource leaks.
         """
+        self.running = False
+        self.capture_thread.join()
         self.cap.release()
         cv2.destroyAllWindows()
