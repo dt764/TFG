@@ -117,7 +117,7 @@ def main():
         webcam.start(args.camera_config_index)
 
     else:
-        webcam = WebcamCapture()
+        webcam = WebcamCapture(BaseConfig.WEBCAM_INDEX_OR_URL)
         print("Parametros de configuración no disponibles para otras camaras distintas a Picamera2. Continuando con ejecución normal")
   
     script_dir = pathlib.Path(__file__).parent.absolute()
@@ -136,6 +136,10 @@ def main():
     last_detected_plate = None
     last_detection_time = None
     time_last_detect_threshold = 3
+
+    ocr_locked = False
+    no_plate_counter = 0
+    NO_PLATE_TIMEOUT_FRAMES = 25
 
     setup_logger()
 
@@ -178,18 +182,15 @@ def main():
             # Perform license plate detection
             roi, ymin, xmin, ymax, xmax, confidence = detector.detect_license_plate(frame)
             
-            #print(f"Dimensiones del frame: {frame.shape}")
-
-            cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
 
             if roi is not None:
+                cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
 
                 #Send message that a plate has been detected
                 #update_screen_state(ScreenMessageKey.READING, parking_to_screen_msg_dispatcher)
 
                 # Draw the detection label
-                object_name = 'license'
-                label = '%s: %d%%' % (object_name, int(confidence * 100))
+                label = f'license: {int(confidence * 100)}%'
                 labelSize, baseLine = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)
                 label_ymin = max(ymin, labelSize[1] + 10)
 
@@ -200,77 +201,90 @@ def main():
                 cv2.putText(frame, label, (xmin, label_ymin - 7), 
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
 
-                # Apply OCR to the detected region of interest (ROI)
-                detected_plate = ocr_processor.apply_ocr(roi)
+                if not ocr_locked:
+                    # Apply OCR to the detected region of interest (ROI)
+                    detected_plate = ocr_processor.apply_ocr(roi)
 
-                if detected_plate:
-                    print(f"Detected Plate: {detected_plate}")
+                    if detected_plate:
+                        print(f"Detected Plate: {detected_plate}")
 
-                    current_time = datetime.now(timezone.utc)
+                        current_time = datetime.now(timezone.utc)
 
-                    # Avoid logging the same plate if it was recently detected
-                    if ((detected_plate != last_detected_plate or last_detected_plate is None)
-                        or ((current_time - last_detection_time).total_seconds() >  time_last_detect_threshold)):
-                        
-                        #Send message that license has been read
-                        update_screen_state(ScreenMessageKey.VERIFYING, parking_to_screen_msg_dispatcher, plate=detected_plate)
-
-                        # Update the last detected plate
-                        last_detected_plate = detected_plate
-                        print(f"{detected_plate} will be sent to verifier")
-
-                        timestamp_str = current_time.strftime('%Y-%m-%dT%H:%M:%SZ')
-
-                        # Create the message payload
-                        msg_dict = {
-                            "plate": detected_plate,
-                            "date": timestamp_str
-                        }
-
-                        # Convert the message to JSON
-                        message = json.dumps(msg_dict)
-
-                        # Send the message to the verifier and wait for a response
-                        parking_msg_dispatcher.send_msg(message=message)
-
-                        good_response = False
-
-                        while not good_response:
-                            parking_msg_dispatcher.wait_and_receive_msg()
-                            response_dict = parking_msg_dispatcher.get_reply_result()
-                            print(response_dict["plate"])
-                            print(response_dict["allowed"])
-                            print(detected_plate)
-
-                            if response_dict["plate"] == detected_plate:
-                                opened_gate = response_dict["allowed"]
-                                good_response = True
-
+                        # Avoid logging the same plate if it was recently detected
+                        if ((detected_plate != last_detected_plate or last_detected_plate is None)
+                            or ((current_time - last_detection_time).total_seconds() >  time_last_detect_threshold)):
                             
-                    else:
-                        print(f"Not logging / verifying {detected_plate} again." +
-                                f" Gate will remain in same state (Opened = {opened_gate})")
-                        
-                    if opened_gate:
-                            #Send message that car is allowed
-                        update_screen_state(ScreenMessageKey.ALLOWED, parking_to_screen_msg_dispatcher, plate=detected_plate)
-                        print("Allowed to enter")
-                    else:
-                        print("Denied to enter")
-                        #Send message that car is not allowed
-                        update_screen_state(ScreenMessageKey.DENIED, parking_to_screen_msg_dispatcher, plate=detected_plate)
-                    
-                     # Update the last detection time
-                    last_detection_time = current_time
-                    last_detected_plate = detected_plate
-                    
-                else:
-                     update_screen_state(ScreenMessageKey.OCR_FAIL, parking_to_screen_msg_dispatcher)
+                            #Send message that license has been read
+                            update_screen_state(ScreenMessageKey.VERIFYING, parking_to_screen_msg_dispatcher, plate=detected_plate)
 
-                   
+                            # Update the last detected plate
+                            last_detected_plate = detected_plate
+                            print(f"{detected_plate} will be sent to verifier")
+
+                            timestamp_str = current_time.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+                            # Create the message payload
+                            msg_dict = {
+                                "plate": detected_plate,
+                                "date": timestamp_str
+                            }
+
+                            # Convert the message to JSON
+                            message = json.dumps(msg_dict)
+
+                            # Send the message to the verifier and wait for a response
+                            parking_msg_dispatcher.send_msg(message=message)
+
+                            good_response = False
+
+                            while not good_response:
+                                parking_msg_dispatcher.wait_and_receive_msg()
+                                response_dict = parking_msg_dispatcher.get_reply_result()
+                                print(response_dict["plate"])
+                                print(response_dict["allowed"])
+                                print(detected_plate)
+
+                                if response_dict["plate"] == detected_plate:
+                                    opened_gate = response_dict["allowed"]
+                                    good_response = True
+
+                                
+                        else:
+                            print(f"Not logging / verifying {detected_plate} again." +
+                                    f" Gate will remain in same state (Opened = {opened_gate})")
+                            
+                        if opened_gate:
+                                #Send message that car is allowed
+                            update_screen_state(ScreenMessageKey.ALLOWED, parking_to_screen_msg_dispatcher, plate=detected_plate)
+                            print("Allowed to enter")
+                        else:
+                            print("Denied to enter")
+                            #Send message that car is not allowed
+                            update_screen_state(ScreenMessageKey.DENIED, parking_to_screen_msg_dispatcher, plate=detected_plate)
+                        
+                        # Update the last detection time
+                        last_detection_time = current_time
+                        last_detected_plate = detected_plate
+                        
+                    else:
+                        update_screen_state(ScreenMessageKey.OCR_FAIL, parking_to_screen_msg_dispatcher)
+
+                else:
+                     # OCR bloqueado, pero revisamos si cambió la matrícula
+                    plate_text = ocr_processor.apply_ocr(roi)
+                    if plate_text and plate_text != last_detected_plate:
+                        print(f"Nueva matrícula detectada: {plate_text}")
+                        update_screen_state(ScreenMessageKey.READING, parking_to_screen_msg_dispatcher)
+                        update_screen_state(ScreenMessageKey.DETECTING, parking_to_screen_msg_dispatcher)
+                        no_plate_counter = 0  
             else:
-                #Send message to screen that is waiting for license plate
-               update_screen_state(ScreenMessageKey.DETECTING, parking_to_screen_msg_dispatcher)
+               # No se detecta matrícula
+                no_plate_counter += 1
+                if no_plate_counter >= NO_PLATE_TIMEOUT_FRAMES:
+                    ocr_locked = False
+                    last_detected_plate = None
+                    no_plate_counter = 0
+                    update_screen_state(ScreenMessageKey.DETECTING, parking_to_screen_msg_dispatcher)
 
             # Convert frame to RGB for pygame
             frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)

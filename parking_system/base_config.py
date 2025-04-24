@@ -27,6 +27,7 @@ class BaseConfig:
     API_KEY="secret-api-key"
 
     USE_PI_CAMERA=False
+    WEBCAM_INDEX_OR_URL=0
 
     SCREEN_MESSAGES = {
         ScreenMessageKey.DETECTING: "Esperando matrícula",
