@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, set_access_cookies, unset_jwt_cookies
 from ..models.user import User
+from ..models.role import Role
 from ..schemas.user import user_schema
 from ..schemas.change_password import change_password_schema
 from ..extensions import db
@@ -8,18 +9,40 @@ from ..extensions import db
 auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/login', methods=['POST'])
-def login():
+def user_login():
     data = request.get_json()
-    
-    # Query the user directly using db.session
     user = db.session.query(User).filter_by(email=data['email']).first()
+    user_role_id = db.session.query(Role).filter_by(name='user').first().id
 
     if user and user.check_password(data['password']):
+        if user.role_id != user_role_id:
+            return jsonify({"error": "Access denied"}), 403
         access_token = create_access_token(identity=str(user.id))
         response = jsonify(user_schema.dump(user))
         set_access_cookies(response, access_token)
         return response
+
     return jsonify({"error": "Invalid credentials"}), 401
+
+
+@auth_bp.route('/admin-login', methods=['POST'])
+def admin_login():
+    data = request.get_json()
+    user = db.session.query(User).filter_by(email=data['email']).first()
+    admin_role_id = db.session.query(Role).filter_by(name='admin').first().id
+
+    print(f"Admin Role ID: {admin_role_id}")
+
+    if user and user.check_password(data['password']):
+        if user.role_id != admin_role_id:
+            return jsonify({"error": "Access denied"}), 403
+        access_token = create_access_token(identity=str(user.id))
+        response = jsonify(user_schema.dump(user))
+        set_access_cookies(response, access_token)
+        return response
+
+    return jsonify({"error": "Invalid credentials"}), 401
+
 
 @auth_bp.route("/logout", methods=["POST"])
 @jwt_required()
@@ -58,3 +81,8 @@ def change_password():
     unset_jwt_cookies(response)
 
     return response
+
+@auth_bp.route("/check-session", methods=["GET"])
+@jwt_required()
+def check_session():
+    return jsonify({"msg": "valid session"}), 200
