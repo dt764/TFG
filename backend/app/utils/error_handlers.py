@@ -60,7 +60,7 @@ def register_error_handlers(app):
         current_app.logger.warning(
             f"HTTP error {err.code}: {err.description}\n"
             f"Request: {request.method} {request.path}\n"
-            f"Data: {request.get_json()}"
+            f"Data: {request.get_json(silent=True)}"
         )
         return jsonify({"error": err.description}), err.code
 
