@@ -1,8 +1,14 @@
-export interface Usuario {
+export interface User {
     id: number;
-    correo: string;
-    nombre: string;
-    apellidos: string;
-    matricula1: string;
-    matricula2: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+    plates: String[];
+}
+
+export interface UpdateUser {
+
+    first_name?: string;
+    last_name?: string;
+    plates?: String[];
 }

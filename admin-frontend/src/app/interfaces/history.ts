@@ -1,7 +1,7 @@
-export interface Historial {
+export interface History {
     id: number;
-    matricula: string;
-    fecha: string;     // ISO format (YYYY-MM-DD)
-    permitido: boolean;
-    usuario_id?: number; 
+    plate: string;
+    date: string;     // ISO format (YYYY-MM-DD)
+    allowed: boolean;
+    user_id?: number; 
 }
