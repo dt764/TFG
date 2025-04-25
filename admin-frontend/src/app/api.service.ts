@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { Observable, catchError, map, of, tap, throwError } from 'rxjs';
-import { UpdateUser, User } from './interfaces/User';
+import { NewUser, UpdateUser, User } from './interfaces/User';
 import { History } from './interfaces/history';
 import { environment } from '../environments/environment';
 
@@ -46,15 +46,17 @@ export class ApiService {
 
   updateUser(user: UpdateUser, id: number): Observable<User> {
     return this.http.put<User>(`${backendUrl}/users/${id}`, user)
-    //.pipe(
-      //catchError(this.handleError<User>(`updateUser`))
-    //);
   }
 
-  addUser(user: User): Observable<User> {
+  addUser(user: NewUser): Observable<User> {
     const url = `${backendUrl}/users`;
-    return this.http.post<User>(url, user, this.httpOptions).pipe(
-      catchError(this.handleError<User>(`addUser`))
+    return this.http.post<User>(url, user, this.httpOptions);
+  }
+
+  deleteUser(id: number): Observable<User> {
+    const url = `${backendUrl}/users/${id}`;
+    return this.http.delete<User>(url, this.httpOptions).pipe(
+      catchError(this.handleError<User>(`deleteUser`))
     );
   }
 

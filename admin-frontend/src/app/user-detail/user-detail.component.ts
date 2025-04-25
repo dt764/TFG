@@ -5,6 +5,7 @@ import { ApiService } from '../api.service';
 import { NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { History } from '../interfaces/history';
+import { UpdateUser_FormErrors } from '../interfaces/form_errors';
 
 @Component({
   selector: 'app-user-detail',
@@ -20,14 +21,8 @@ export class UserDetailComponent {
   userHistory: History[] = [];
   updateUser: UpdateUser | undefined;
 
-  formErrors: {
-    first_name?: string[];
-    last_name?: string[];
-    plates?: { [index: number]: string[] };
-    [key: string]: any;
-  } = {};
+  formErrors: UpdateUser_FormErrors = {}
   
-
   successMessage: string | null = null;
 
   
@@ -58,7 +53,7 @@ export class UserDetailComponent {
   }
 
   save(): void {
-    if (this.user) {
+    if (this.user && this.user.id !== undefined) {
       this.updateUser = {
         first_name: this.user.first_name,
         last_name: this.user.last_name,
@@ -67,7 +62,7 @@ export class UserDetailComponent {
       this.apiService.updateUser(this.updateUser, this.user.id).subscribe({
         next: (user) => {
           this.user = user;
-          this.clearErrors();
+          this.formErrors = {}; // Limpiamos los errores cuando la actualización es exitosa
           this.successMessage = 'Datos guardados correctamente ✅';
   
           // Borra el mensaje después de 3 segundos (opcional)
@@ -76,35 +71,12 @@ export class UserDetailComponent {
           }, 3000);
         },
         error: (err) => {
-          if (err.status === 400 /*&& err.error.errors*/) {
-            this.handleValidationErrors(err.error.error);
+          if (err.status === 400 && err.error.error) {
+            this.formErrors = err.error.error;
             console.log('Error de validación:', err.error.error);
           }
         }
       });
     }
-  }
-
-  handleValidationErrors(errors: any): void {
-    this.formErrors = {};
-    
-    for (const field in errors) {
-      if (field === 'plates' && typeof errors[field] === 'object' && !Array.isArray(errors[field])) {
-        // Si plates tiene errores por índice
-        this.formErrors['plates'] = {};
-        for (const index in errors.plates) {
-          (this.formErrors ['plates'] as { [index: number]: string[] })[+index] = errors.plates[index];
-        }
-      } else {
-        this.formErrors[field] = errors[field];
-      }
-    }
-  }
-  
-  
-  clearErrors(): void {
-    this.formErrors = {}; // Limpiamos los errores cuando la actualización es exitosa
-  }
-  
-
+  } 
 }

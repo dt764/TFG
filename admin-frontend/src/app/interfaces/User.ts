@@ -12,3 +12,11 @@ export interface UpdateUser {
     last_name?: string;
     plates?: String[];
 }
+
+export interface NewUser {
+    email: string;
+    password: string;
+    first_name: string;
+    last_name: string;
+    plates: String[];
+}
