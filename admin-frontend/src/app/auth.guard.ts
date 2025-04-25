@@ -9,7 +9,7 @@ export const authGuard: CanActivateFn = (route, state) => {
   const http = inject(HttpClient);
   const router = inject(Router);
 
-  return http.get(`${environment.apiUrl}/check-session`, {
+  return http.get(`${environment.apiUrl}/check-admin-session`, {
     withCredentials: true
   }).pipe(
     map(() => true),
