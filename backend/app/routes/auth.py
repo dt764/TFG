@@ -82,7 +82,41 @@ def change_password():
 
     return response
 
-@auth_bp.route("/check-session", methods=["GET"])
+
+@auth_bp.route("/check-user-session", methods=["GET"])
 @jwt_required()
-def check_session():
-    return jsonify({"msg": "valid session"}), 200
+def check_user_session():
+    current_user_id = get_jwt_identity()
+    user = db.session.get(User, current_user_id)
+    
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    user_role = db.session.query(Role).filter_by(name='user').first()
+    if not user_role:
+        return jsonify({"error": "User role not configured"}), 500
+
+    if user.role_id != user_role.id:
+        return jsonify({"error": "Access denied"}), 403
+
+    return jsonify({"msg": "Valid user session"}), 200
+
+
+@auth_bp.route("/check-admin-session", methods=["GET"])
+@jwt_required()
+def check_admin_session():
+    current_user_id = get_jwt_identity()
+    user = db.session.get(User, current_user_id)
+    
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    admin_role = db.session.query(Role).filter_by(name='admin').first()
+    if not admin_role:
+        return jsonify({"error": "Admin role not configured"}), 500
+
+    if user.role_id != admin_role.id:
+        return jsonify({"error": "Access denied"}), 403
+
+    return jsonify({"msg": "Valid admin session"}), 200
+
