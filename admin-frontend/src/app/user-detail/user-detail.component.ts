@@ -20,7 +20,13 @@ export class UserDetailComponent {
   userHistory: History[] = [];
   updateUser: UpdateUser | undefined;
 
-  formErrors: { [key: string]: string[] } = {};
+  formErrors: {
+    first_name?: string[];
+    last_name?: string[];
+    plates?: { [index: number]: string[] };
+    [key: string]: any;
+  } = {};
+  
 
   successMessage: string | null = null;
 
@@ -80,13 +86,21 @@ export class UserDetailComponent {
   }
 
   handleValidationErrors(errors: any): void {
-    this.formErrors = {}; // Limpiamos antes de agregar nuevos errores
-    for (let key in errors) {
-      if (errors.hasOwnProperty(key)) {
-        this.formErrors[key] = errors[key]; // Asumimos que `errors[key]` es un array de strings
+    this.formErrors = {};
+    
+    for (const field in errors) {
+      if (field === 'plates' && typeof errors[field] === 'object' && !Array.isArray(errors[field])) {
+        // Si plates tiene errores por índice
+        this.formErrors['plates'] = {};
+        for (const index in errors.plates) {
+          (this.formErrors ['plates'] as { [index: number]: string[] })[+index] = errors.plates[index];
+        }
+      } else {
+        this.formErrors[field] = errors[field];
       }
     }
   }
+  
   
   clearErrors(): void {
     this.formErrors = {}; // Limpiamos los errores cuando la actualización es exitosa

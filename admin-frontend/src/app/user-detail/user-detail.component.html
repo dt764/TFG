@@ -28,12 +28,14 @@
                 <h3>Matriculas</h3>
                 <ul>
                     <li *ngFor="let plate of user.plates; let i = index">
-                    <input type="text" [(ngModel)]="user.plates[i]" placeholder="0000BBB" />
+                      <input type="text" [(ngModel)]="user.plates[i]" placeholder="0000BBB" />
+                      <div *ngIf="formErrors['plates'] && formErrors['plates'][i]" class="error-message">
+                        <div *ngFor="let msg of formErrors['plates'][i]">
+                          {{ msg }}
+                        </div>
+                      </div>
                     </li>
-                </ul>
-                <div *ngIf="formErrors['plates']" class="error-message">
-                    <div *ngFor="let msg of formErrors['plates']">{{ msg }}</div>
-                </div>
+                  </ul>
             </div>
             <div class="buttons-container">
                 <button type="button" (click)="save()">save</button>
