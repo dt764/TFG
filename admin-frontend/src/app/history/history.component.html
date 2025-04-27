@@ -1,14 +1,37 @@
 <h2>Historial de entrada</h2>
-<div class="content-container">
-  <div class="cards-container">
-    <div 
-      *ngFor="let entry of history_entries" 
-      
-      class="card">
-      
-      <span>{{entry.allowed}}</span>
-      <span>{{entry.date}}</span>
-      <a [routerLink]="'/users/' + entry.user_id">{{entry.user_id}}</a>
+<div class="container mt-4">
+  <!-- Filtro por rango de fecha -->
+  <div class="row mb-3">
+    <div class="col-md-4">
+      <label for="startDate" class="form-label">Fecha de inicio</label>
+      <input type="date" id="startDate" class="form-control" (change)="filterByDate()">
+    </div>
+    <div class="col-md-4">
+      <label for="endDate" class="form-label">Fecha de fin</label>
+      <input type="date" id="endDate" class="form-control" (change)="filterByDate()">
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header">
+          <h4 class="mb-0">Historial de Entradas</h4>
+        </div>
+        <div class="card-body">
+          <div class="list-group">
+            <div *ngFor="let entry of filteredEntries" class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <span class="badge" [ngClass]="{'bg-success': entry.allowed, 'bg-danger': !entry.allowed}">
+                  {{entry.allowed ? 'Permitido' : 'Denegado'}}
+                </span>
+                <span class="ms-3 text-muted">{{entry.date}}</span>
+              </div>
+              <a [routerLink]="'/users/' + entry.user_id" class="btn btn-info btn-sm">Ver Usuario</a>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
