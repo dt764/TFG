@@ -1,21 +1,37 @@
-<h2>Iniciar sesión</h2>
+<!-- Asegúrate de tener Bootstrap cargado en tu proyecto -->
 
-<form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-  <label>Email:</label>
-  <input formControlName="email" type="email" />
-  <div *ngIf="loginForm.controls.email.invalid && loginForm.controls.email.touched">
-    Email inválido
+<!-- Fondo azul y centrado -->
+<div class="bg-primary" style="min-height: 100vh; height: 1px; min-width: 100vw; width: 1px;">
+  <div class="d-flex align-items-center h-100 justify-content-center flex-column" style="margin-left: 2rem; margin-right: 2rem;">
+    <div class="foto width text-center d-flex justify-content-center align-items-center">
+      <h1 class="text-white fw-bold">Gestión de Parking UAL</h1>
+    </div>
+    <div class="card p-4 shadow border-0 width">
+      <h2 class="mb-4 text-center fs-2">Iniciar sesión</h2>
+  
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <div class="mb-4">
+          <label for="email" class="form-label fs-4">Email:</label>
+          <input id="email" formControlName="email" type="email" class="form-control fs-4" />
+          <div *ngIf="loginForm.controls.email.invalid && loginForm.controls.email.touched" class="text-danger mt-1 fs-4">
+            Email inválido
+          </div>
+        </div>
+  
+        <div class="mb-4">
+          <label for="password" class="form-label fs-4">Contraseña:</label>
+          <input id="password" formControlName="password" type="password" class="form-control fs-4" />
+          <div *ngIf="loginForm.controls.password.invalid && loginForm.controls.password.touched" class="text-danger mt-2 fs-4">
+            Contraseña requerida
+          </div>
+        </div>
+  
+        <button type="submit" class="btn btn-primary w-100 fs-4" [disabled]="loading || loginForm.invalid">Entrar</button>
+  
+        <div *ngIf="errorMessage" class="text-danger mt-3 text-center fs-4">
+          {{ errorMessage }}
+        </div>
+      </form>
+    </div>
   </div>
-
-  <label>Contraseña:</label>
-  <input formControlName="password" type="password" />
-  <div *ngIf="loginForm.controls.password.invalid && loginForm.controls.password.touched">
-    Contraseña requerida
-  </div>
-
-  <button type="submit" [disabled]="loading">Entrar</button>
-
-  <div *ngIf="errorMessage" style="color: red;">
-    {{ errorMessage }}
-  </div>
-</form>
+</div>

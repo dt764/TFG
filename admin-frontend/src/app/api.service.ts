@@ -23,10 +23,7 @@ export class ApiService {
 
   login(credentials: { email: string, password: string }): Observable<any> {
     const url = `${backendUrl}/admin-login`;
-    return this.http.post(url, credentials, this.httpOptions).pipe(
-      tap(() => console.log('Login successful')),
-      catchError(this.handleError<any>('login'))
-    );
+    return this.http.post(url, credentials, this.httpOptions)
   }
   
 

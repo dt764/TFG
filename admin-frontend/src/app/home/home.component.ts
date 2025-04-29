@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { ApiService } from '../api.service';
 
 @Component({
   selector: 'app-home',
@@ -12,5 +13,23 @@ import { RouterLink, RouterOutlet } from '@angular/router';
   styleUrl: './home.component.scss'
 })
 export class HomeComponent {
+
+  constructor(
+    private router: Router,
+    private api: ApiService
+  ) {
+
+  }
+
+  logout() {
+    this.api.logout().subscribe({
+      next: () => {
+        this.router.navigate(['/login']);
+      },
+      error: (err) => {
+        console.error('Error al cerrar sesión', err);
+      }
+    });
+  }
 
 }

@@ -1,36 +1,66 @@
-<h2>Historial de entrada</h2>
-<div class="container mt-4">
+<h2 class="display-3 p-3 mb-4" style="font-weight: 600;">Historial de entrada</h2>
+
+<div class="container-fluid mt-1">
   <!-- Filtro por rango de fecha -->
-  <div class="row mb-3">
-    <div class="col-md-4">
-      <label for="startDate" class="form-label">Fecha de inicio</label>
-      <input type="date" id="startDate" class="form-control" (change)="filterByDate()">
+  <div class="row mb-4">
+    <div class="col-12 col-md-6 p-3">
+      <label for="startDate" class="form-label fs-4" style="font-weight: 600;">Fecha de inicio:</label>
+      <input type="date" id="startDate" class="form-control fs-4" [(ngModel)]="startDate" (change)="filterEntries()">
     </div>
-    <div class="col-md-4">
-      <label for="endDate" class="form-label">Fecha de fin</label>
-      <input type="date" id="endDate" class="form-control" (change)="filterByDate()">
+    <div class="col-12 col-md-6 p-3">
+      <label for="endDate" class="form-label fs-4" style="font-weight: 600;">Fecha de fin:</label>
+      <input type="date" id="endDate" class="form-control fs-4" [(ngModel)]="endDate" (change)="filterEntries()">
     </div>
   </div>
 
+  <div class="row mb-4 justify-content-center">
+    <div class="col-12 col-md-6 p-3">
+      <label for="startDate" class="form-label fs-4" style="font-weight: 600; margin-right: 10px;">Matrícula:</label>
+      <input type="text" id="plate-input" class="form-control fs-4" [(ngModel)]="plate_input" (change)="filterEntries()">
+    </div>
+    <div class="col-12 col-md-6 p-3">
+      <label for="status" class="form-label fs-4" style="font-weight: 600; margin-right: 10px;">Estado:</label>
+      <select id="status" class="form-select fs-4" [(ngModel)]="statusFilter" (change)="filterEntries()">
+        <option value="">Todos</option>
+        <option value="permitido">Permitido</option>
+        <option value="denegado">Denegado</option>
+      </select>
+    </div>
+  </div>
+  
+
   <div class="row">
     <div class="col-md-12">
-      <div class="card">
-        <div class="card-header">
-          <h4 class="mb-0">Historial de Entradas</h4>
-        </div>
-        <div class="card-body">
-          <div class="list-group">
-            <div *ngFor="let entry of filteredEntries" class="list-group-item d-flex justify-content-between align-items-center">
-              <div>
-                <span class="badge" [ngClass]="{'bg-success': entry.allowed, 'bg-danger': !entry.allowed}">
-                  {{entry.allowed ? 'Permitido' : 'Denegado'}}
+      <div class="table-responsive rounded">
+        <table class="table table-striped align-middle text-center fs-4 rounded">
+          <thead class="table-light">
+            <tr>
+              <th>Estado</th>
+              <th>Fecha</th>
+              <th>Matrícula</th>
+              <th>Usuario</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let entry of filteredEntries">
+              <td>
+                <span class="badge fs-5" [ngClass]="{'bg-success': entry.allowed, 'bg-danger': !entry.allowed}">
+                  {{ entry.allowed ? 'Permitido' : 'Denegado' }}
                 </span>
-                <span class="ms-3 text-muted">{{entry.date}}</span>
-              </div>
-              <a [routerLink]="'/users/' + entry.user_id" class="btn btn-info btn-sm">Ver Usuario</a>
-            </div>
-          </div>
-        </div>
+              </td>
+              <td>{{ entry.date | date:'dd/MM/yyyy HH:mm'}}</td>
+              <td>{{ entry.plate }}</td>
+              <td>
+                <a *ngIf="entry.user_id" [routerLink]="'/users/' + entry.user_id" class="btn btn-info btn-sm bg-primary text-white fs-4 border-primary">
+                  Ver Usuario
+                </a>
+                <span *ngIf="!entry.user_id" class="text-muted">
+                  Sin usuario
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

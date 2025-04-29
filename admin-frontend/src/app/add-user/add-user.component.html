@@ -1,52 +1,57 @@
-<h1>Añadir usuario</h1>
+<h2 class="display-3 p-3 mb-4" style="font-weight: 600;">Añadir usuario</h2>
 
-<form (ngSubmit)="createUser()">
-    <ul>
-        <li>
-            <label for="name">Nombre:</label>
-            <input type="text" id="name" [(ngModel)]="newUser.first_name" name="name" required>
-            <div *ngIf="formErrors['first_name']" class="error-message">
-                <div *ngFor="let msg of formErrors['first_name']">{{ msg }}</div>
+<form (ngSubmit)="createUser()" class="container-fluid">
+    <h3 class="mt-4 mb-4 display-6">Información del usuario</h3>
+    <div class="row mb-3">
+        <div class="col-12 col-lg-6 p-3">
+            <label for="name" class= "form-label fs-4">Nombre:</label>
+            <input type="text" id="name" [(ngModel)]="newUser.first_name" name="name" class="form-control fs-4" required>
+            <div *ngIf="formErrors['first_name']" class="text-danger mt-1">
+                <div *ngFor="let msg of formErrors['first_name']" class="fs-4">{{ msg }}</div>
             </div>
-        </li>
-        <li>
-            <label for="apellidos">Apellidos:</label>
-            <input type="text" id="apellidos" [(ngModel)]="newUser.last_name" name="apellidos" required>
-            <div *ngIf="formErrors['last_name']" class="error-message">
-                <div *ngFor="let msg of formErrors['last_name']">{{ msg }}</div>
+        </div>
+        <div class="col p-3">
+            <label for="apellidos" class="form-label fs-4">Apellidos:</label>
+            <input type="text" id="apellidos" [(ngModel)]="newUser.last_name" name="apellidos" class="form-control fs-4" required>
+            <div *ngIf="formErrors['last_name']" class="text-danger mt-1">
+                <div *ngFor="let msg of formErrors['last_name']" class="fs-4 mb-1">{{ msg }}</div>
             </div>
-        </li>
-        <li>
-            <label for="">Correo:</label>
-            <input type="text" id="email" [(ngModel)]="newUser.email" name="email" required>
-            <div *ngIf="formErrors['email']" class="error-message">
-                <div *ngFor="let msg of formErrors['email']">{{ msg }}</div>
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <label for="email" class="form-label fs-4">Correo:</label>
+        <input type="email" id="email" [(ngModel)]="newUser.email" name="email" class="form-control fs-4" required>
+        <div *ngIf="formErrors['email']" class="text-danger mt-1">
+            <div *ngFor="let msg of formErrors['email']" class="fs-4 mb-1">{{ msg }}</div>
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <label for="passwd" class="form-label fs-4">Contraseña:</label>
+        <input type="password" id="passwd" [(ngModel)]="newUser.password" name="password" class="form-control fs-4" required>
+        <div *ngIf="formErrors['password']" class="text-danger mt-1">
+            <div *ngFor="let msg of formErrors['password']" class="fs-4 mb-1">{{ msg }}</div>
+        </div>
+    </div>
+
+    <h3 class="mt-5 display-6">Matrículas</h3>
+    <div class="row mb-3">
+        <div class="col-12 col-md-6 mb-1">
+            <label for="matricula1" class="form-label fs-4">Matrícula 1:</label>
+            <input type="text" id="matricula1" [(ngModel)]="newUser.plates[0]" name="matricula1" placeholder="0000BBB" class="form-control fs-4" required>
+            <div *ngIf="formErrors['plates'] && formErrors['plates'][0]" class="text-danger mt-1 fs-4">
+                <div *ngFor="let msg of formErrors['plates'][0]" class="mb-1">{{ msg }}</div>
             </div>
-        </li>
-        <li>
-            <label for="passwd">Contraseña:</label>
-            <input type="password" id="passwd" [(ngModel)]="newUser.password" name="password" required>
-            <div *ngIf="formErrors['password']" class="error-message">
-                <div *ngFor="let msg of formErrors['password']">{{ msg }}</div>
+        </div>
+        <div class="col-12 col-md-6">
+            <label for="matricula2" class="form-label fs-4">Matrícula 2:</label>
+            <input type="text" id="matricula2" [(ngModel)]="newUser.plates[1]" name="matricula2" placeholder="0000BBB" class="form-control fs-4">
+            <div *ngIf="formErrors['plates'] && formErrors['plates'][1]" class="text-danger mt-1 fs-4">
+                <div *ngFor="let msg of formErrors['plates'][1]">{{ msg }}</div>
             </div>
-        </li>
-        <ul>
-            <h3>Matrículas</h3>
-            <li>
-                <label [for]="'matricula1'">Matrícula 1:</label>
-                <input type="text" id="matricula1"  [(ngModel)]="newUser.plates[0]" placeholder="0000BBB" name="matricula1" required>
-                <div *ngIf="formErrors['plates'] && formErrors['plates'][0]" class="error-message">
-                    <div *ngFor="let msg of formErrors['plates'][0]">{{ msg }}</div>
-                </div>
-            </li>
-            <li >
-                <label [for]="'matricula2'">Matrícula 2:</label>
-                <input type="text" id="matricula2"  [(ngModel)]="newUser.plates[1]" placeholder="0000BBB" name="matricula1" required>
-                <div *ngIf="formErrors['plates'] && formErrors['plates'][1]" class="error-message">
-                    <div *ngFor="let msg of formErrors['plates'][1]">{{ msg }}</div>
-                </div>
-            </li>
-        </ul>   
-    </ul>
-    <button type="submit">Añadir</button>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary fs-4 mt-4">Añadir</button>
 </form>

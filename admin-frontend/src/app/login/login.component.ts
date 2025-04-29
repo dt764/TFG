@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ApiService } from '../api.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -16,7 +16,7 @@ export class LoginComponent {
   errorMessage = '';
   loading = false;
 
-  loginForm;
+  loginForm;;
 
   constructor(
     private fb: FormBuilder,
@@ -34,6 +34,7 @@ export class LoginComponent {
     this.loading = true;
 
     if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();  // fuerza mostrar los errores
       this.loading = false;
       return;
     }
@@ -51,9 +52,12 @@ export class LoginComponent {
         this.router.navigate(['/']);
       },
       error: (err) => {
-        this.errorMessage = err.error?.error || 'Error al iniciar sesión';
-        this.loading = false;
-      }
+        if (err.status === 401 && err.error.error) {
+          this.errorMessage = 'Credenciales incorrectas';
+          this.loading = false;
+        }
+        }
+        
     });
   }
 }

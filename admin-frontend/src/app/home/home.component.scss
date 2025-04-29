@@ -7,11 +7,11 @@
         left: 0;
         z-index: 100;
         background: #1e4f84;
-        width: 350px;
+        width: 400px;
         padding-top: 0;
     }
     main {
-        margin-left: 350px;
+        margin-left: 400px;
     }
 }
 
@@ -19,6 +19,10 @@
     background: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), url(../../../public/assets/escudo-ual.png);
     background-size: cover;
     overflow: hidden;
-    height: 150px;
+    height: 234px;
     background-size: 235%;
+}
+
+.font-size {
+    font-size: 1.7rem;
 }

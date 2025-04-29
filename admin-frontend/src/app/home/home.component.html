@@ -8,24 +8,24 @@
 </nav>
 
 <!-- Sidebar como offcanvas en móviles -->
-<div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="offcanvasSidebar" style="background-color: #1e4f84;">
+<div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="offcanvasSidebar" style="background-color: #1e4f84;" data-bs-dismiss="offcanvas">
   <div class="foto text-center d-flex justify-content-center align-items-center">
-    <h1 class="text-white">Gestión de Parking UAL</h1>
+    <h1 class="text-white fs-1">Gestión de Parking UAL</h1>
   </div>
   <div class="offcanvas-body p-0">
     <ul class="nav flex-column bg-white">
       <li class="nav-item">
-        <a class="nav-link d-flex align-items-center text-dark" routerLink="" style="font-size: 1.1rem;">
+        <a class="nav-link d-flex align-items-center text-dark font-size" routerLink="">
           <i class="bi bi-clock-history me-2"></i> Historial
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link d-flex align-items-center text-dark" routerLink="/users" style="font-size: 1.1rem;">
+        <a class="nav-link d-flex align-items-center text-dark font-size" routerLink="/users">
           <i class="bi bi-people me-2"></i> Usuarios
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link d-flex align-items-center text-dark" routerLink="/add-user" style="font-size: 1.1rem;">
+        <a class="nav-link d-flex align-items-center text-dark font-size" routerLink="/add-user">
           <i class="bi bi-person-plus me-2"></i> Añadir usuario
         </a>
       </li>
@@ -48,17 +48,17 @@
     </div>
     <ul class="nav bg-white flex-column">
       <li class="nav-item">
-        <a class="nav-link text-dark d-flex align-items-center" routerLink="" style="font-size: 1.1rem;">
+        <a class="nav-link text-dark d-flex align-items-center font-size" routerLink="">
           <i class="bi bi-clock-history me-2"></i> Historial
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link text-dark d-flex align-items-center" routerLink="/users" style="font-size: 1.1rem;">
+        <a class="nav-link text-dark d-flex align-items-center font-size" routerLink="/users">
           <i class="bi bi-people me-2"></i> Usuarios
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link text-dark d-flex align-items-center" routerLink="/add-user" style="font-size: 1.1rem;">
+        <a class="nav-link text-dark d-flex align-items-center font-size" routerLink="/add-user">
           <i class="bi bi-person-plus me-2"></i> Añadir usuario
         </a>
       </li>
@@ -66,7 +66,7 @@
   </div>
   <!-- Cerrar sesión abajo -->
   <div class="p-3">
-    <a href="#" class="nav-link text-white text-center d-flex align-items-center justify-content-center" onclick="logout()" style="font-size: 1.1rem;">
+    <a href="#" class="nav-link text-white text-center d-flex align-items-center justify-content-center" (click)="logout()" style="font-size: 1.5rem;">
       <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
     </a>
   </div>

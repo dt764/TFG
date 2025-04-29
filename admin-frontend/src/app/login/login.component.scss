@@ -1,0 +1,13 @@
+.foto {
+    background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url(../../../public/assets/escudo-ual.png);
+    background-size: cover;
+    overflow: hidden;
+    height: 234px;
+    background-size: max(235%, 600px);
+    width: 100%;
+    background-color: rgba(100, 100, 100, 1);
+}
+
+.width {
+    width: min(100%, 500px); border-radius: 0px;
+}

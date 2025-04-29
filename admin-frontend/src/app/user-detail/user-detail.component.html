@@ -1,64 +1,55 @@
-<h1> Detalles del user</h1>
+<h2 class="display-3 p-3 mb-4" style="font-weight: 600;">
+  Detalles del usuario
+</h2>
 
-<div class="content-container">
-    <div *ngIf="user" class="content">
-        
-        <div class="info-container">
-            <h2>{{user.first_name}} Details</h2>
-
-            <div class="info">
-                <h3>Info</h3>
-                <div class="nombre-container">
-                    <label for="user-nombre"> Nombre: </label>
-                    <input id="user-nombre" [(ngModel)]="user.first_name" placeholder="nombre" />
-                    <div *ngIf="formErrors['first_name']" class="error-message">
-                      <div *ngFor="let msg of formErrors['first_name']">{{ msg }}</div>
-                    </div>
-                  </div>
-                  <div class="apellidos-container">
-                    <label for="user-apellidos"> Apellidos: </label>
-                    <input id="user-apellidos" [(ngModel)]="user.last_name" placeholder="apellidos" />
-                    <div *ngIf="formErrors['last_name']" class="error-message">
-                      <div *ngFor="let msg of formErrors['last_name']">{{ msg }}</div>
-                    </div>
-                  </div>
-            </div>
-        
-            <div class="info">
-                <h3>Matriculas</h3>
-                <ul>
-                    <li *ngFor="let plate of user.plates; let i = index">
-                      <input type="text" [(ngModel)]="user.plates[i]" placeholder="0000BBB" />
-                      <div *ngIf="formErrors['plates'] && formErrors['plates'][i]" class="error-message">
-                        <div *ngFor="let msg of formErrors['plates'][i]">
-                          {{ msg }}
-                        </div>
-                      </div>
-                    </li>
-                  </ul>
-            </div>
-            <div class="buttons-container">
-                <button type="button" (click)="save()">save</button>
+<div class="container-fluid fs-4">
+    <div *ngIf="successMessage" class="alert alert-success mt-3">
+      {{ successMessage }}
+    </div>
+    <div *ngIf="user">
+      <div class="row mb-4">
+        <div class="col-12 mb-3">
+            <label for="user-nombre" class="form-label">Nombre:</label>
+            <input id="user-nombre" [(ngModel)]="user.first_name" class="form-control fs-4" placeholder="Nombre" />
+            <div *ngIf="formErrors['first_name']" class="text-danger mt-1">
+                <div *ngFor="let msg of formErrors['first_name']">{{ msg }}</div>
             </div>
         </div>
+        <div class="mb-3">
+            <label for="user-apellidos" class="form-label">Apellidos:</label>
+            <input id="user-apellidos" [(ngModel)]="user.last_name" class="form-control fs-4" placeholder="Apellidos" />
+            <div *ngIf="formErrors['last_name']" class="text-danger mt-1">
+                <div *ngFor="let msg of formErrors['last_name']">{{ msg }}</div>
+            </div>
+        </div>
+
+        <h3 class="mt-4">Matrículas</h3>
+        <div *ngFor="let plate of user.plates; let i = index" class="mb-3">
+            <input type="text" [(ngModel)]="user.plates[i]" class="form-control fs-4" placeholder="0000BBB" />
+            <div *ngIf="formErrors['plates'] && formErrors['plates'][i]" class="text-danger mt-1 fs-4">
+                <div *ngFor="let msg of formErrors['plates'][i]">{{ msg }}</div>
+            </div>
+        </div>
+        <div>
+          <button type="button" (click)="save()" class="btn btn-success fs-4">Guardar</button>
+        </div>
+              
+      </div>
+
+      <h3>Historial</h3>
+      <table class="table table-striped">
+          <thead>
+              <tr>
+                  <th>Matrícula</th>
+                  <th>Fecha</th>
+              </tr>
+          </thead>
+          <tbody>
+              <tr *ngFor="let entry of userHistory">
+                  <td>{{entry.plate}}</td>
+                  <td>{{entry.date}}</td>
+              </tr>
+          </tbody>
+      </table>
     </div>
-    <table>
-        <tr>
-            <th>Matricula</th>
-            <th>Fecha</th>
-        </tr>
-        <tr *ngFor="let entry of userHistory">
-            <td>
-                {{entry.plate}}
-            </td>
-            <td>
-                {{entry.date}}
-            </td>
-        </tr>
-    </table>
-    <!-- Mensaje de éxito -->
-    <div *ngIf="successMessage" class="success-message">
-        {{ successMessage }}
-    </div>
-  
 </div>
