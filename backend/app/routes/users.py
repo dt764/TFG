@@ -6,6 +6,7 @@ from ..models.plate import Plate
 from ..schemas.user import user_schema, users_schema, create_user_schema, update_user_schema
 from ..utils.auth_utils import role_required
 
+
 users_bp = Blueprint('users', __name__)
 
 #---------------------------------#
@@ -25,43 +26,71 @@ def get_users():
 @jwt_required()
 @role_required('admin')
 def create_user():
-
     json_data = request.get_json()
-    create_user_schema.validate(json_data)
+
+    # Validación del esquema
+    errors = create_user_schema.validate(json_data)
+    if errors:
+        return jsonify({"error": errors}), 400
 
     data = create_user_schema.load(json_data)
+    plates = data.get('plates', [])
 
-    # Check if email exists
+    error_response = {}
+    plate_indices_map = {}
+    plate_errors_by_index = {}
+
+    # Detectar duplicados en el payload
+    for index, plate in enumerate(plates):
+        if plate in plate_indices_map:
+            first_index = plate_indices_map[plate]
+            if str(first_index) not in plate_errors_by_index:
+                plate_errors_by_index[str(first_index)] = ["Duplicado"]
+            plate_errors_by_index[str(index)] = ["Duplicado"]
+        else:
+            plate_indices_map[plate] = index
+
+    # Verificar placas ya registradas en la base de datos
+    existing_plates = db.session.execute(
+        db.select(Plate.plate).filter(Plate.plate.in_(plates))
+    ).scalars().all()
+
+    # Marcar los índices de las placas existentes
+    for index, plate in enumerate(plates):
+        if plate in existing_plates:
+            if str(index) not in plate_errors_by_index:
+                plate_errors_by_index[str(index)] = []
+            plate_errors_by_index[str(index)].append("Ya registrada en la base de datos")
+
+    if plate_errors_by_index:
+        error_response["plates"] = plate_errors_by_index
+
+    # Verificar si el correo ya existe
     if db.session.execute(db.select(User).filter_by(email=data['email'])).scalar():
-        return jsonify({"error": "Email already exists"}), 400
+        error_response["email"] = ["Email ya registrado"]
 
-    # Check if any plate already exists
-    existing_plates = [
-        plate_number for plate_number in data.get('plates', [])
-        if db.session.execute(db.select(Plate).filter_by(plate=plate_number)).scalar()
-    ]
-    if existing_plates:
-        return jsonify({
-            "error": "The following plates are already registered",
-            "plates": existing_plates
-        }), 400
+    # Si hay errores, devolverlos todos juntos
+    if error_response:
+        return jsonify({"error": error_response}), 400
 
+    # Crear usuario
     new_user = User(
         email=data['email'],
         first_name=data['first_name'],
         last_name=data['last_name'],
-        password=data['password'],
-        role_id=2  # Usuario normal
+        password=data['password'],  # Recuerda hashear
+        role_id=2  # Rol de usuario normal
     )
 
-    # Add plates if any
-    for plate_number in data.get('plates', []):
+    # Asociar placas
+    for plate_number in plates:
         db.session.add(Plate(plate=plate_number, user=new_user))
 
     db.session.add(new_user)
     db.session.commit()
 
     return jsonify(user_schema.dump(new_user)), 201
+
 
 #---------------------------------#
 
@@ -96,42 +125,63 @@ def update_user(user_id):
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    # Check if the user is an admin
     if user.role.id == 1:
         return jsonify({"error": "Cannot modify admin users"}), 403
 
+    error_response = {}
+
+    # Campos personales
     if 'first_name' in data:
         user.first_name = data['first_name']
     if 'last_name' in data:
         user.last_name = data['last_name']
 
-    # Update plates if provided
+    # Validar y actualizar placas
     if 'plates' in data:
-        # Get current user plates
-        current_plates = {plate.plate for plate in user.plates}
-        new_plates = set(data['plates'])
-        
-        # Check if any new plate is registered to another user
-        plates_to_check = new_plates - current_plates
-        if plates_to_check:
-            existing_plates = [
-                plate_number for plate_number in plates_to_check
-                if (plate := db.session.execute(db.select(Plate).filter_by(plate=plate_number)).scalar())
-                and plate.user_id != user_id
-            ]
-            if existing_plates:
-                return jsonify({
-                    "error": "The following plates are already registered to another user",
-                    "plates": existing_plates
-                }), 400
+        plates = data['plates']
+        plate_indices_map = {}
+        plate_errors_by_index = {}
 
-        # Remove all current plates and add the new ones
+        # Duplicados en el payload
+        for index, plate in enumerate(plates):
+            if plate in plate_indices_map:
+                first_index = plate_indices_map[plate]
+                if str(first_index) not in plate_errors_by_index:
+                    plate_errors_by_index[str(first_index)] = ["Duplicado"]
+                plate_errors_by_index[str(index)] = ["Duplicado"]
+            else:
+                plate_indices_map[plate] = index
+
+        # Placas registradas por otro usuario
+        plates_to_check = set(plates)
+        if plates_to_check:
+            existing_plates = db.session.execute(
+                db.select(Plate).filter(Plate.plate.in_(plates_to_check))
+            ).scalars().all()
+
+            for existing_plate in existing_plates:
+                if existing_plate.user_id != user_id:
+                    for index, plate in enumerate(plates):
+                        if plate == existing_plate.plate:
+                            if str(index) not in plate_errors_by_index:
+                                plate_errors_by_index[str(index)] = []
+                            plate_errors_by_index[str(index)].append("Ya registrada en otro usuario")
+
+        if plate_errors_by_index:
+            error_response["plates"] = plate_errors_by_index
+
+    if error_response:
+        return jsonify({"error": error_response}), 400
+
+    # Si no hay errores, actualizar placas
+    if 'plates' in data:
         db.session.execute(db.delete(Plate).where(Plate.user_id == user_id))
-        for plate_number in new_plates:
+        for plate_number in set(data['plates']):
             db.session.add(Plate(plate=plate_number, user=user))
 
     db.session.commit()
     return jsonify(user_schema.dump(user)), 200
+
 
 #---------------------------------#
 

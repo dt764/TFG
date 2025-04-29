@@ -5,14 +5,14 @@ from ..models.user import User
 import re
 
 class UserSchema(ma.SQLAlchemyAutoSchema):
-    email = fields.Email(required=True, validate=validate.Email(error="Invalid email format"))
+    email = fields.Email(required=True, validate=validate.Email(error="Formato de email inválido"))
     first_name = fields.Str(required=True, validate=[
-        validate.Length(min=2, max=80, error="First name must be between 2 and 80 characters"),
-        validate.Regexp(r'^[a-zA-Z\s-]+$', error="First name can only contain letters, spaces and hyphens")
+        validate.Length(min=2, max=80, error="El nombre tiene que tener entre 2 y 80 caracteres"),
+        validate.Regexp(r'^[a-zA-Z\s-]+$', error="El nombre solo puede tener can only letras, espacios y guiones")
     ])
     last_name = fields.Str(required=True, validate=[
-        validate.Length(min=2, max=120, error="Last name must be between 2 and 120 characters"),
-        validate.Regexp(r'^[a-zA-Z\s-]+$', error="Last name can only contain letters, spaces and hyphens")
+        validate.Length(min=2, max=120, error="El apellido tiene que tener entre 2 y 80 caracteres"),
+        validate.Regexp(r'^[a-zA-Z\s-]+$', error="El apellido solo puede tener can only letras, espacios y guiones")
     ])
     password = fields.Str(load_only=True, required=True)
     plates = fields.Method("get_plates")
@@ -32,7 +32,7 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
 
 class CreateUserSchema(UserSchema):
     plates = fields.List(fields.Str(validate=validate.Regexp(r'^(C?\d{4}[B-DF-HJ-NP-RTV-Z]{3})$', 
-                        error="Invalid plate format. Plates must be 6-7 characters long and contain only uppercase letters and numbers.")))
+                        error="Formato inválido.")))
     class Meta(UserSchema.Meta):
         exclude = ("id", "password_hash", "role", "histories")
 

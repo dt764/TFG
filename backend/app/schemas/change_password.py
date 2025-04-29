@@ -2,8 +2,8 @@ from marshmallow import Schema, fields, validates
 from ..utils.validators import validate_password
 
 class ChangePasswordSchema(Schema):
-    old_password = fields.Str(required=True, error_messages={"required": "Old password is required"})
-    new_password = fields.Str(required=True, error_messages={"required": "New password is required"})
+    old_password = fields.Str(required=True, error_messages={"required": "Campo obligatorio"})
+    new_password = fields.Str(required=True, error_messages={"required": "Campo obligatorio"})
 
     @validates("new_password")
     def validate_password(self, value):
