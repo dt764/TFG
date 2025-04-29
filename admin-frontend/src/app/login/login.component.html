@@ -20,7 +20,17 @@
   
         <div class="mb-4">
           <label for="password" class="form-label fs-4">Contraseña:</label>
-          <input id="password" formControlName="password" type="password" class="form-control fs-4" />
+          <div class="input-group">
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              id="password"
+              formControlName="password"
+              class="form-control fs-4"
+            />
+            <button type="button" class="btn btn-outline-primary" (click)="togglePasswordVisibility()">
+              <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+            </button>
+          </div>
           <div *ngIf="loginForm.controls.password.invalid && loginForm.controls.password.touched" class="text-danger mt-2 fs-4">
             Contraseña requerida
           </div>

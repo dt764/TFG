@@ -16,7 +16,9 @@ export class LoginComponent {
   errorMessage = '';
   loading = false;
 
-  loginForm;;
+  loginForm;
+
+  showPassword = false;
 
   constructor(
     private fb: FormBuilder,
@@ -27,6 +29,10 @@ export class LoginComponent {
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required]
     });
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
   }
 
   onSubmit() {
@@ -52,11 +58,18 @@ export class LoginComponent {
         this.router.navigate(['/']);
       },
       error: (err) => {
-        if (err.status === 401 && err.error.error) {
+        this.loading = false;
+      
+        if (err.status === 0) {
+          this.errorMessage = 'Servidor no disponible. Intenta más tarde.';
+        } else if (err.status === 500) {
+          this.errorMessage = 'Error interno del servidor. Por favor, contacta con soporte.';
+        } else if (err.status === 401 && err.error?.error) {
           this.errorMessage = 'Credenciales incorrectas';
-          this.loading = false;
+        } else {
+          this.errorMessage = 'Error inesperado. Intenta nuevamente.';
         }
-        }
+      }
         
     });
   }
