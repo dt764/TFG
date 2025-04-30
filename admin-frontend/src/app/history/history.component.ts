@@ -35,12 +35,23 @@ export class HistoryComponent implements OnInit {
   itemsPerPage = 10;
   pageSizeOptions = [5, 10, 25, 50];
 
+  isLoading: boolean = false;
+  errorMessage: string | null = null;
+
   constructor(private api: ApiService) {}
 
   loadHistory() {
-    this.api.getHistory().subscribe((data) => {
-      this.history_entries = data;
-      this.filteredEntries = [...this.history_entries];
+    this.isLoading = true
+    this.api.getHistory().subscribe({
+      next: history_entries => {
+        this.history_entries = history_entries;
+        this.filteredEntries = [...this.history_entries];
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false;
+        this.errorMessage = 'No se pudo cargar el historial';
+      }
     });
   }
 

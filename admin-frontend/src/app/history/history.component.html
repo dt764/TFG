@@ -1,4 +1,20 @@
-<div class="container-fluid mt-1">
+<h2 class="display-3 p-3 mb-4" style="font-weight: 600;">
+  Historial del parking
+</h2>
+
+<div *ngIf="isLoading" class="text-center my-5">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Cargando...</span>
+  </div>
+  <p class="fs-4 mt-3">Cargando datos del usuario...</p>
+</div>
+
+<!-- Mensaje de error -->
+<div *ngIf="errorMessage" class="alert alert-danger mt-3 fs-4">
+  {{ errorMessage }}
+</div>
+
+<div *ngIf="history_entries.length > 0" class="container-fluid mt-1">
   <!-- Filtros -->
   <div class="row mb-4">
     <div class="col-12 col-md-6 p-3">

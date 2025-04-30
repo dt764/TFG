@@ -58,9 +58,7 @@ export class ApiService {
 
   getUserHistory(id: string): Observable<History[]> {
     const url = `${backendUrl}/users/${id}/history`;
-    return this.http.get<History[]>(url).pipe(
-      catchError(this.handleError<History[]>('getHistoryUser', []))
-    );
+    return this.http.get<History[]>(url);
   }
 
   logout(): Observable<any> {
