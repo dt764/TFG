@@ -5,6 +5,7 @@ import { NgFor, NgIf } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MessageService } from '../message.service';
 import { FormsModule } from '@angular/forms';
+import { NgxPaginationModule } from 'ngx-pagination';
 
 @Component({
   selector: 'app-users',
@@ -13,7 +14,8 @@ import { FormsModule } from '@angular/forms';
     NgFor,
     RouterLink,
     NgIf,
-    FormsModule
+    FormsModule,
+    NgxPaginationModule,
   ],
   templateUrl: './users.component.html',
   styleUrl: './users.component.scss'
@@ -23,6 +25,11 @@ export class UsersComponent {
   users: User[] = [];
   successMessage: string | null = null;
   searchTerm: string = '';
+
+  // Paginación
+  currentPage = 1;
+  itemsPerPage = 10;
+  pageSizeOptions = [5, 10, 20, 50];
 
   constructor(
     private apiService: ApiService,
@@ -49,13 +56,12 @@ export class UsersComponent {
         .subscribe(users => this.users = users);
   }
 
-  get filteredUsers(): User[] {
+  get filteredUsers() {
     const term = this.searchTerm.toLowerCase();
     return this.users.filter(user =>
-      user.first_name.toLowerCase().includes(term) ||
-      user.last_name.toLowerCase().includes(term) ||
-      user.email.toLowerCase().includes(term) ||
-      user.plates.some(plate => plate.toLowerCase().includes(term))
+      (user.first_name + ' ' + user.last_name + ' ' + user.email + ' ' + user.plates.join(' '))
+        .toLowerCase()
+        .includes(term)
     );
   }
 
