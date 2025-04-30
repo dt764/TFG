@@ -32,6 +32,7 @@ export class UserDetailComponent {
   formErrors: UpdateUser_FormErrors = {}
   
   successMessage: string | null = null;
+  errorMessage: string | undefined;
 
   confirmDelete = false;
 
@@ -73,6 +74,7 @@ export class UserDetailComponent {
       },
       error: () => {
         this.isLoading = false;
+        this.errorMessage = 'No se pudo cargar la información del usuario. Inténtalo más tarde.';
       }
     });
   }
@@ -88,6 +90,7 @@ export class UserDetailComponent {
       },
       error: () => {
         this.isLoading = false;
+        this.errorMessage = 'No se pudo cargar la información del usuario. Inténtalo más tarde.';
       }
     });
   }

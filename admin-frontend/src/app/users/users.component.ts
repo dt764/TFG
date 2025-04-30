@@ -24,12 +24,15 @@ export class UsersComponent {
 
   users: User[] = [];
   successMessage: string | null = null;
+  errorMessage: string | undefined;
   searchTerm: string = '';
 
   // Paginación
   currentPage = 1;
   itemsPerPage = 5;
   pageSizeOptions = [5, 10, 20, 50];
+
+  isLoading: boolean = false;
 
   constructor(
     private apiService: ApiService,
@@ -52,8 +55,18 @@ export class UsersComponent {
   }
 
   getUsers(): void {
+    this.isLoading = true;
     this.apiService.getUsers()
-        .subscribe(users => this.users = users);
+        .subscribe({
+          next: users => {
+            this.users = users;
+            this.isLoading = false;
+          },
+          error: () => {
+            this.isLoading = false;
+            this.errorMessage = 'Error al cargar los usuarios';
+          }
+        });
   }
 
   get filteredUsers() {
