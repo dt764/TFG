@@ -1,5 +1,10 @@
 <h2 class="display-3 p-3 mb-4" style="font-weight: 600;">Añadir usuario</h2>
 
+<!-- Mensaje de error -->
+<div *ngIf="errorMessage" class="alert alert-danger mt-3 fs-4">
+    {{ errorMessage }}
+</div>
+
 <form (ngSubmit)="createUser()" class="container-fluid">
     <h3 class="mt-4 mb-4 display-6">Información del usuario</h3>
     <div class="row mb-3">

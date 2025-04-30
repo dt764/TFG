@@ -26,6 +26,8 @@ export class AddUserComponent {
 
   }
 
+  errorMessage: string | null = null;
+
   formErrors: NewUser_FormErrors = {}
 
 
@@ -44,7 +46,9 @@ export class AddUserComponent {
         error: (err) => {
           if (err.status === 400 /*&& err.error.errors*/) {
             this.formErrors = err.error.error;
-            console.log('Error de validación:', err.error.error);
+          }
+          else {
+            this.errorMessage = 'No se pudo crear el usuario. Intente más tarde.';
           }
         }
       });
