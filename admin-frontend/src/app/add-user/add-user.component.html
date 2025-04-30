@@ -3,14 +3,14 @@
 <form (ngSubmit)="createUser()" class="container-fluid">
     <h3 class="mt-4 mb-4 display-6">Información del usuario</h3>
     <div class="row mb-3">
-        <div class="col-12 col-lg-6 p-3">
+        <div class="col-12 col-lg-6">
             <label for="name" class= "form-label fs-4">Nombre:</label>
             <input type="text" id="name" [(ngModel)]="newUser.first_name" name="name" class="form-control fs-4" required>
             <div *ngIf="formErrors['first_name']" class="text-danger mt-1">
                 <div *ngFor="let msg of formErrors['first_name']" class="fs-4">{{ msg }}</div>
             </div>
         </div>
-        <div class="col p-3">
+        <div class="col-12 col-lg-6">
             <label for="apellidos" class="form-label fs-4">Apellidos:</label>
             <input type="text" id="apellidos" [(ngModel)]="newUser.last_name" name="apellidos" class="form-control fs-4" required>
             <div *ngIf="formErrors['last_name']" class="text-danger mt-1">
@@ -52,6 +52,7 @@
             </div>
         </div>
     </div>
-
-    <button type="submit" class="btn btn-primary fs-4 mt-4">Añadir</button>
+    <div class="d-flex justify-content-end">
+        <button type="submit" class="btn btn-primary fs-4">Añadir</button>
+    </div>
 </form>

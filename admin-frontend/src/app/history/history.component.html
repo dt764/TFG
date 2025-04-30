@@ -31,7 +31,11 @@
 
   <div class="row">
     <div class="col-md-12">
-      <div class="table-responsive rounded">
+      <div *ngIf="history_entries.length === 0" class="text-center fs-4 text-muted mb-4">
+        No hay entradas en el historial registradas.
+      </div>
+  
+      <div *ngIf="history_entries.length > 0" class="table-responsive rounded">
         <table class="table table-striped align-middle text-center fs-4 rounded">
           <thead class="table-light">
             <tr>

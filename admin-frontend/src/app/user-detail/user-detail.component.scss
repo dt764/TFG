@@ -1,0 +1,29 @@
+.user-tabs .tab-option {
+    cursor: pointer;
+    color: #6c757d; /* gris para las inactivas */
+    position: relative;
+    transition: color 0.3s ease;
+  }
+  
+  .user-tabs .tab-option.active {
+    color: #004488; /* tu color primario */
+    font-weight: 600;
+  }
+  
+  .user-tabs .tab-option::after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    height: 3px;
+    width: 100%;
+    background-color: #004488; /* tu color primario */
+    transform: scaleX(0);
+    transform-origin: bottom left;
+    transition: transform 0.3s ease;
+  }
+  
+  .user-tabs .tab-option.active::after {
+    transform: scaleX(1);
+  }
+  
