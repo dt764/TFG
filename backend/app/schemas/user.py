@@ -5,14 +5,14 @@ from ..models.user import User
 import re
 
 class UserSchema(ma.SQLAlchemyAutoSchema):
-    email = fields.Email(required=True, validate=validate.Email(error="Formato de email inválido"))
+    email = fields.Email(required=True, error_messages={"invalid": "Formato de email inválido"})
     first_name = fields.Str(required=True, validate=[
         validate.Length(min=2, max=80, error="El nombre tiene que tener entre 2 y 80 caracteres"),
-        validate.Regexp(r'^[a-zA-Z\s-]+$', error="El nombre solo puede tener can only letras, espacios y guiones")
+        validate.Regexp(r'^[a-zA-Z\s-]+$', error="El nombre solo puede tener letras, espacios y guiones")
     ])
     last_name = fields.Str(required=True, validate=[
         validate.Length(min=2, max=120, error="El apellido tiene que tener entre 2 y 80 caracteres"),
-        validate.Regexp(r'^[a-zA-Z\s-]+$', error="El apellido solo puede tener can only letras, espacios y guiones")
+        validate.Regexp(r'^[a-zA-Z\s-]+$', error="El apellido solo puede tener letras, espacios y guiones")
     ])
     password = fields.Str(load_only=True, required=True)
     plates = fields.Method("get_plates")
