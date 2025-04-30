@@ -12,17 +12,12 @@
 <div class="container-fluid fs-4">
   <!-- Botones para cambiar de sección -->
   <nav class="d-flex gap-4 mb-4 border-bottom pb-2 user-tabs align-items-center">
-    <div
-      class="fs-4 pb-2 tab-option text-center"
-      [class.active]="activeSection === 'details'"
+    <div class="fs-4 pb-2 tab-option text-center" [class.active]="activeSection === 'details'"
       (click)="switchSection('details')">
       Datos del usuario
     </div>
-  
-    <div
-      class="fs-4 pb-2 tab-option"
-      [class.active]="activeSection === 'history'"
-      (click)="switchSection('history')">
+
+    <div class="fs-4 pb-2 tab-option" [class.active]="activeSection === 'history'" (click)="switchSection('history')">
       Historial
     </div>
   </nav>
@@ -69,7 +64,7 @@
           <button type="button" (click)="save()" class="btn btn-success bg-primary text-white border-primary fs-4">
             Guardar cambios
           </button>
-        
+
           <!-- Botón para eliminar -->
           <button type="button" class="btn btn-danger fs-4 text-white" (click)="confirmDelete = true">
             Eliminar usuario
@@ -79,12 +74,15 @@
     </div>
 
     <!-- Sección de HISTORIAL -->
+    <!-- Sección de HISTORIAL dentro del componente del usuario -->
     <div *ngIf="activeSection === 'history'">
       <h2 class="fs-1 pt-2 mb-4">Historial</h2>
+
       <div class="row mb-4">
         <div class="col-12 col-md-6 p-3">
           <label for="startDate" class="form-label fs-4">Fecha de inicio:</label>
-          <input type="date" id="startDate" class="form-control fs-4" [(ngModel)]="startDate" (change)="filterEntries()">
+          <input type="date" id="startDate" class="form-control fs-4" [(ngModel)]="startDate"
+            (change)="filterEntries()">
         </div>
         <div class="col-12 col-md-6 p-3">
           <label for="endDate" class="form-label fs-4">Fecha de fin:</label>
@@ -94,16 +92,20 @@
 
       <div class="row mb-4 justify-content-center">
         <div class="col-md-6 p-3">
-          <label for="plate-input" class="form-label">Matrícula:</label>
-          <input type="text" id="plate-input" class="form-control fs-4" [(ngModel)]="plate_input" (change)="filterEntries()">
+          <label for="plate-input" class="form-label fs-4">Matrícula:</label>
+          <input type="text" id="plate-input" class="form-control fs-4" [(ngModel)]="plate_input"
+            (change)="filterEntries()">
         </div>
       </div>
 
-      <div *ngIf="userHistory.length === 0" class="text-center fs-4 text-muted mb-4">
-        No hay entradas en el historial registradas.
+      <div class="mb-3">
+        <label class="me-2">Filas por página:</label>
+        <select class="form-select d-inline w-auto fs-4" [(ngModel)]="itemsPerPage" (change)="currentPage = 1">
+          <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</option>
+        </select>
       </div>
 
-      <table *ngIf="userHistory.length > 0" class="table table-striped text-center">
+      <table *ngIf="filteredEntries.length > 0" class="table table-striped text-center">
         <thead>
           <tr>
             <th>Matrícula</th>
@@ -111,14 +113,21 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let entry of filteredEntries">
+          <tr
+            *ngFor="let entry of filteredEntries | paginate: { itemsPerPage: itemsPerPage, currentPage: currentPage }">
             <td>{{entry.plate}}</td>
             <td>{{entry.date | date:'dd/MM/yyyy HH:mm'}}</td>
           </tr>
         </tbody>
       </table>
+
+      <pagination-controls (pageChange)="currentPage = $event" [autoHide]="true"
+        class="d-flex justify-content-center mt-3">
+      </pagination-controls>
     </div>
-    <div *ngIf="confirmDelete" class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
+
+    <div *ngIf="confirmDelete" class="modal fade show d-block" tabindex="-1"
+      style="background-color: rgba(0, 0, 0, 0.5);">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
@@ -129,7 +138,8 @@
             <p class="fs-5">¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer.</p>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn fs-4" (click)="confirmDelete = false" style="border: solid 1px;">Cancelar</button>
+            <button type="button" class="btn fs-4" (click)="confirmDelete = false"
+              style="border: solid 1px;">Cancelar</button>
             <button type="button" class="btn btn-danger text-white fs-4" (click)="deleteUser()">Eliminar</button>
           </div>
         </div>

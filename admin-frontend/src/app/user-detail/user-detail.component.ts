@@ -7,11 +7,18 @@ import { FormsModule } from '@angular/forms';
 import { History } from '../interfaces/history';
 import { UpdateUser_FormErrors } from '../interfaces/form_errors';
 import { MessageService } from '../message.service';
+import { NgxPaginationModule } from 'ngx-pagination';
 
 @Component({
   selector: 'app-user-detail',
   standalone: true,
-  imports: [NgIf, FormsModule, NgFor, CommonModule],
+  imports: [
+    NgIf,
+    FormsModule,
+    NgFor,
+    CommonModule,
+    NgxPaginationModule
+  ],
   templateUrl: './user-detail.component.html',
   styleUrl: './user-detail.component.scss'
 })
@@ -35,6 +42,10 @@ export class UserDetailComponent {
   activeSection: 'details' | 'history' = 'details';
 
   isLoading: boolean = false;
+
+  currentPage = 1;
+  itemsPerPage = 10;
+  pageSizeOptions = [5, 10, 25, 50];
   
   constructor(
     private router: Router,
@@ -125,36 +136,15 @@ export class UserDetailComponent {
    
   }
   
-  filterEntries(): void {
-    let filtered = [...this.userHistory];
-  
-    // Filtrado por fechas
-    if (this.startDate || this.endDate) {
-      const start = this.startDate ? new Date(this.startDate + 'T00:00:00') : null;
-      const end = this.endDate ? new Date(this.endDate + 'T23:59:59') : null;
-  
-      filtered = filtered.filter(entry => {
-        const entryDate = new Date(entry.date);
-        let isInRange = true;
-  
-        if (start && entryDate < start) {
-          isInRange = false;
-        }
-  
-        if (end && entryDate > end) {
-          isInRange = false;
-        }
-  
-        return isInRange;
-      });
-    }
-  
-    // Filtrado por matrícula
-    if (this.plate_input) {
-      filtered = filtered.filter(entry => entry.plate.includes(this.plate_input));
-    } 
-  
-    this.filteredEntries = filtered;
+  filterEntries() {
+    this.filteredEntries = this.userHistory.filter(entry => {
+      const entryDate = new Date(entry.date);
+      const inDateRange = (!this.startDate || entryDate >= new Date(this.startDate)) &&
+                          (!this.endDate || entryDate <= new Date(this.endDate));
+      const matchesPlate = !this.plate_input || entry.plate.toLowerCase().includes(this.plate_input.toLowerCase());
+      return inDateRange && matchesPlate;
+    });
+    this.currentPage = 1;
   }
 
 }
