@@ -5,12 +5,12 @@ import {NewUser} from '../interfaces/User'
 import { ApiService } from '../api.service';
 import { NewUser_FormErrors } from '../interfaces/form_errors';
 import { Router } from '@angular/router';
-import { NgFor, NgIf } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-add-user',
   standalone: true,
-  imports: [FormsModule, NgIf, NgFor],
+  imports: [FormsModule, NgIf, NgFor, NgClass],
   templateUrl: './add-user.component.html',
   styleUrl: './add-user.component.scss'
 })
@@ -30,16 +30,25 @@ export class AddUserComponent {
 
   formErrors: NewUser_FormErrors = {}
 
+  requestIsLoading: boolean = false;  // Estado de carga
+
+  showPassword: boolean = false;  // Control de visibilidad de la contraseña
 
   constructor(
     private apiService: ApiService,
     private router: Router
   ) {}
 
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;  // Cambiar el estado de visibilidad
+  }
+
   createUser() {
+    this.requestIsLoading = true;  // Iniciar carga
     this.apiService.addUser(this.newUser)
       .subscribe({
         next: (user) => {
+          this.requestIsLoading = false;  // Finalizar carga
           this.router.navigate(['/users', user.id]);
           
         },
@@ -50,6 +59,7 @@ export class AddUserComponent {
           else {
             this.errorMessage = 'No se pudo crear el usuario. Intente más tarde.';
           }
+          this.requestIsLoading = false;  // Finalizar carga
         }
       });
   }
