@@ -2,20 +2,31 @@
 <div *ngIf="successMessage" class="alert alert-success fs-4">
   {{ successMessage }}
 </div>
-
+<div class="container mb-4">
+  <input
+    type="text"
+    class="form-control form-control-lg"
+    placeholder="Buscar por nombre, apellido, matrícula o email"
+    [(ngModel)]="searchTerm"
+  />
+</div>
 <div class="container-fluid">
   <div class="row">
-    <div *ngFor="let user of users" class="col-md-6 col-lg-4 mb-3">
+    <div *ngFor="let user of filteredUsers" class="col-md-6 col-lg-4 mb-3">
       <a routerLink="/users/{{user.id}}" class="text-decoration-none">
         <div class="card h-100">
           <div class="card-body">
             <h5 class="card-title d-flex justify-content-between align-items-center">
-              <span class="fs-3">{{user.first_name}} {{user.last_name}}</span>
+              <span class="fs-3">{{ user.first_name }} {{ user.last_name }}</span>
             </h5>
-
+          
+            <p class="card-text fs-5 mb-2 text-muted">
+              {{ user.email }}
+            </p>
+          
             <ul class="list-unstyled">
               <li *ngFor="let item of user.plates">
-                <span class="badge bg-primary m-1 fs-5">{{item}}</span>
+                <span class="badge bg-primary m-1 fs-5">{{ item }}</span>
               </li>
             </ul>
           </div>
