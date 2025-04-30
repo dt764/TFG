@@ -23,26 +23,22 @@ export class ApiService {
 
   login(credentials: { email: string, password: string }): Observable<any> {
     const url = `${backendUrl}/admin-login`;
-    return this.http.post(url, credentials, this.httpOptions)
+    return this.http.post(url, credentials, this.httpOptions);
   }
   
 
   getUsers(): Observable<User[]> {
     const url = `${backendUrl}/users`;
-    return this.http.get<User[]>(url).pipe(
-      catchError(this.handleError<User[]>('getUsers', []))
-    );
+    return this.http.get<User[]>(url);
   }
 
   getUser(id: string): Observable<User> {
     const url = `${backendUrl}/users/${id}`;
-    return this.http.get<User>(url).pipe(
-      catchError(this.handleError<User>(`getUser`))
-    );
+    return this.http.get<User>(url);
   }
 
   updateUser(user: UpdateUser, id: number): Observable<User> {
-    return this.http.put<User>(`${backendUrl}/users/${id}`, user)
+    return this.http.put<User>(`${backendUrl}/users/${id}`, user);
   }
 
   addUser(user: NewUser): Observable<User> {
@@ -52,16 +48,12 @@ export class ApiService {
 
   deleteUser(id: number): Observable<User> {
     const url = `${backendUrl}/users/${id}`;
-    return this.http.delete<User>(url, this.httpOptions).pipe(
-      catchError(this.handleError<User>(`deleteUser`))
-    );
+    return this.http.delete<User>(url, this.httpOptions);
   }
 
   getHistory(): Observable<History[]> {
     const url = `${backendUrl}/history`;
-    return this.http.get<History[]>(url).pipe(
-      catchError(this.handleError<History[]>('getHistory', []))
-    );
+    return this.http.get<History[]>(url);
   }
 
   getUserHistory(id: string): Observable<History[]> {
@@ -73,10 +65,7 @@ export class ApiService {
 
   logout(): Observable<any> {
     const url = `${backendUrl}/logout`;
-    return this.http.post(url, {}, this.httpOptions).pipe(
-      tap(() => console.log('Logout successful')),
-      catchError(this.handleError<any>('logout'))
-    );
+    return this.http.post(url, {}, this.httpOptions);
   }
 
    /**
