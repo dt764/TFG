@@ -5,21 +5,21 @@
 </div>
 
 <!-- Buscador -->
-<div class="container mb-4">
+<div class="container mb-5">
   <input
     type="text"
-    class="form-control form-control-lg"
+    class="form-control form-control-lg fs-4"
     placeholder="Buscar por nombre, apellido, matrícula o email"
     [(ngModel)]="searchTerm"
   />
 </div>
 
 <!-- Selector de filas por página -->
-<div class="container d-flex justify-content-between align-items-center mb-3">
+<div class="container-fluid d-flex justify-content-between align-items-center mb-4">
   <div>
-    <label for="itemsPerPageSelect" class="me-2">Filas por página:</label>
+    <label for="itemsPerPageSelect" class="me-2 fs-4">Filas por página:</label>
     <select id="itemsPerPageSelect"
-            class="form-select d-inline w-auto"
+            class="form-select d-inline w-auto fs-4"
             [(ngModel)]="itemsPerPage"
             (change)="currentPage = 1">
       <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</option>
@@ -30,7 +30,7 @@
 <!-- Tabla -->
 <div class="container-fluid">
   <div class="table-responsive">
-    <table class="table table-hover align-middle">
+    <table class="table table-hover align-middle fs-4 text-center">
       <thead class="table-light">
         <tr>
           <th>Nombre</th>
@@ -39,7 +39,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let user of filteredUsers | paginate: { itemsPerPage: itemsPerPage, currentPage: currentPage }">
+        <tr *ngFor="let user of filteredUsers | paginate: { itemsPerPage: itemsPerPage, currentPage: currentPage }" class="p-3">
           <td>
             <a [routerLink]="'/users/' + user.id" class="text-decoration-none text-dark">
               {{ user.first_name }} {{ user.last_name }}
@@ -60,6 +60,6 @@
   <pagination-controls
     (pageChange)="currentPage = $event"
     [autoHide]="true"
-    class="d-flex justify-content-center mt-3">
+    class="d-flex justify-content-center mt-3 fs-4">
   </pagination-controls>
 </div>

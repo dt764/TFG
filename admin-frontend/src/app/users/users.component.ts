@@ -28,7 +28,7 @@ export class UsersComponent {
 
   // Paginación
   currentPage = 1;
-  itemsPerPage = 10;
+  itemsPerPage = 5;
   pageSizeOptions = [5, 10, 20, 50];
 
   constructor(
