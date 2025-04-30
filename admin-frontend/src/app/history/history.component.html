@@ -1,71 +1,72 @@
-<h2 class="display-3 p-3 mb-4" style="font-weight: 600;">Historial de entrada</h2>
-
 <div class="container-fluid mt-1">
-  <!-- Filtro por rango de fecha -->
+  <!-- Filtros -->
   <div class="row mb-4">
     <div class="col-12 col-md-6 p-3">
-      <label for="startDate" class="form-label fs-4" style="font-weight: 600;">Fecha de inicio:</label>
+      <label for="startDate" class="form-label fs-4">Fecha de inicio:</label>
       <input type="date" id="startDate" class="form-control fs-4" [(ngModel)]="startDate" (change)="filterEntries()">
     </div>
     <div class="col-12 col-md-6 p-3">
-      <label for="endDate" class="form-label fs-4" style="font-weight: 600;">Fecha de fin:</label>
+      <label for="endDate" class="form-label fs-4">Fecha de fin:</label>
       <input type="date" id="endDate" class="form-control fs-4" [(ngModel)]="endDate" (change)="filterEntries()">
     </div>
   </div>
 
   <div class="row mb-4 justify-content-center">
-    <div class="col-12 col-md-6 p-3">
-      <label for="startDate" class="form-label fs-4" style="font-weight: 600; margin-right: 10px;">Matrícula:</label>
-      <input type="text" id="plate-input" class="form-control fs-4" [(ngModel)]="plate_input" (change)="filterEntries()">
+    <div class="col-md-6 p-3">
+      <label class="form-label fs-4">Matrícula:</label>
+      <input type="text" class="form-control fs-4" [(ngModel)]="plate_input" (change)="filterEntries()">
     </div>
-    <div class="col-12 col-md-6 p-3">
-      <label for="status" class="form-label fs-4" style="font-weight: 600; margin-right: 10px;">Estado:</label>
-      <select id="status" class="form-select fs-4" [(ngModel)]="statusFilter" (change)="filterEntries()">
+    <div class="col-md-6 p-3">
+      <label class="form-label fs-4">Estado:</label>
+      <select class="form-select fs-4" [(ngModel)]="statusFilter" (change)="filterEntries()">
         <option value="">Todos</option>
         <option value="permitido">Permitido</option>
         <option value="denegado">Denegado</option>
       </select>
     </div>
   </div>
-  
 
-  <div class="row">
-    <div class="col-md-12">
-      <div *ngIf="history_entries.length === 0" class="text-center fs-4 text-muted mb-4">
-        No hay entradas en el historial registradas.
-      </div>
-  
-      <div *ngIf="history_entries.length > 0" class="table-responsive rounded">
-        <table class="table table-striped align-middle text-center fs-4 rounded">
-          <thead class="table-light">
-            <tr>
-              <th>Estado</th>
-              <th>Fecha</th>
-              <th>Matrícula</th>
-              <th>Usuario</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let entry of filteredEntries">
-              <td>
-                <span class="badge fs-5" [ngClass]="{'bg-success': entry.allowed, 'bg-danger': !entry.allowed}">
-                  {{ entry.allowed ? 'Permitido' : 'Denegado' }}
-                </span>
-              </td>
-              <td>{{ entry.date | date:'dd/MM/yyyy HH:mm'}}</td>
-              <td>{{ entry.plate }}</td>
-              <td>
-                <a *ngIf="entry.user_id" [routerLink]="'/users/' + entry.user_id" class="btn btn-info btn-sm bg-primary text-white fs-4 border-primary">
-                  Ver Usuario
-                </a>
-                <span *ngIf="!entry.user_id" class="text-muted">
-                  Sin usuario
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+  <!-- Selector filas por página -->
+  <div class="mb-3">
+    <label class="me-2">Filas por página:</label>
+    <select class="form-select d-inline w-auto fs-4" [(ngModel)]="itemsPerPage" (change)="currentPage = 1">
+      <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</option>
+    </select>
   </div>
+
+  <!-- Tabla -->
+  <table *ngIf="filteredEntries.length > 0" class="table table-striped text-center fs-4">
+    <thead class="table-light">
+      <tr>
+        <th>Estado</th>
+        <th>Fecha</th>
+        <th>Matrícula</th>
+        <th>Usuario</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let entry of filteredEntries | paginate: { itemsPerPage: itemsPerPage, currentPage: currentPage }">
+        <td>
+          <span class="badge fs-5" [ngClass]="{'bg-success': entry.allowed, 'bg-danger': !entry.allowed}">
+            {{ entry.allowed ? 'Permitido' : 'Denegado' }}
+          </span>
+        </td>
+        <td>{{ entry.date | date:'dd/MM/yyyy HH:mm' }}</td>
+        <td>{{ entry.plate }}</td>
+        <td>
+          <a *ngIf="entry.user_id" [routerLink]="'/users/' + entry.user_id" class="btn btn-info btn-sm bg-primary text-white fs-4 border-primary">
+            Ver Usuario
+          </a>
+          <span *ngIf="!entry.user_id" class="text-muted p-2">Sin usuario</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <pagination-controls
+    (pageChange)="currentPage = $event"
+    [autoHide]="true"
+    class="d-flex justify-content-center mt-3">
+    
+  </pagination-controls>
 </div>

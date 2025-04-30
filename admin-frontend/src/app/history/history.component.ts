@@ -4,6 +4,7 @@ import { History } from '../interfaces/history';
 import { RouterLink } from '@angular/router';
 import { CommonModule, NgClass, NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { NgxPaginationModule } from 'ngx-pagination';
 
 @Component({
   selector: 'app-history',
@@ -14,7 +15,8 @@ import { FormsModule } from '@angular/forms';
     NgClass,
     NgIf,
     CommonModule,
-    FormsModule
+    FormsModule,
+    NgxPaginationModule
   ],
   templateUrl: './history.component.html',
   styleUrl: './history.component.scss',
@@ -29,6 +31,10 @@ export class HistoryComponent implements OnInit {
   endDate: string = '';
   statusFilter: string = '';
 
+  currentPage = 1;
+  itemsPerPage = 10;
+  pageSizeOptions = [5, 10, 25, 50];
+
   constructor(private api: ApiService) {}
 
   loadHistory() {
@@ -42,43 +48,18 @@ export class HistoryComponent implements OnInit {
     this.loadHistory();
   } 
 
-  filterEntries(): void {
-    let filtered = [...this.history_entries];
-  
-    // Filtrado por fechas
-    if (this.startDate || this.endDate) {
-      const start = this.startDate ? new Date(this.startDate + 'T00:00:00') : null;
-      const end = this.endDate ? new Date(this.endDate + 'T23:59:59') : null;
-  
-      filtered = filtered.filter(entry => {
-        const entryDate = new Date(entry.date);
-        let isInRange = true;
-  
-        if (start && entryDate < start) {
-          isInRange = false;
-        }
-  
-        if (end && entryDate > end) {
-          isInRange = false;
-        }
-  
-        return isInRange;
-      });
-    }
-  
-    // Filtrado por matrícula
-    if (this.plate_input) {
-      filtered = filtered.filter(entry => entry.plate.includes(this.plate_input));
-    }
-  
-    // Filtrado por estado
-    if (this.statusFilter) {
-      filtered = filtered.filter(entry =>
-        this.statusFilter === 'permitido' ? entry.allowed : !entry.allowed
-      );
-    }
-  
-    this.filteredEntries = filtered;
-  }
-  
+  filterEntries() {
+    this.filteredEntries = this.history_entries.filter(entry => {
+      const dateValid = (!this.startDate || new Date(entry.date) >= new Date(this.startDate)) &&
+                        (!this.endDate || new Date(entry.date) <= new Date(this.endDate));
+      const plateMatch = !this.plate_input || entry.plate.toLowerCase().includes(this.plate_input.toLowerCase());
+      const statusMatch =
+        !this.statusFilter ||
+        (this.statusFilter === 'permitido' && entry.allowed) ||
+        (this.statusFilter === 'denegado' && !entry.allowed);
+
+      return dateValid && plateMatch && statusMatch;
+    });
+    this.currentPage = 1;
+  } 
 }
