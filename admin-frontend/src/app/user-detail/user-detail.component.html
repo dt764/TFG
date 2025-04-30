@@ -11,9 +11,9 @@
 
 <div class="container-fluid fs-4">
   <!-- Botones para cambiar de sección -->
-  <nav class="d-flex gap-4 mb-4 border-bottom pb-2 user-tabs">
+  <nav class="d-flex gap-4 mb-4 border-bottom pb-2 user-tabs align-items-center">
     <div
-      class="fs-4 pb-2 tab-option"
+      class="fs-4 pb-2 tab-option text-center"
       [class.active]="activeSection === 'details'"
       (click)="switchSection('details')">
       Datos del usuario
@@ -37,14 +37,14 @@
     <div *ngIf="activeSection === 'details'">
       <h2 class="fs-1 pt-2 mb-4">Información</h2>
       <div class="row mb-4">
-        <div class="col-12 mb-3">
+        <div class="col-12 col-md-6 mb-3">
           <label for="user-nombre" class="form-label">Nombre:</label>
           <input id="user-nombre" [(ngModel)]="user.first_name" class="form-control fs-4" placeholder="Nombre" />
           <div *ngIf="formErrors['first_name']" class="text-danger mt-1">
             <div *ngFor="let msg of formErrors['first_name']">{{ msg }}</div>
           </div>
         </div>
-        <div class="mb-3">
+        <div class="col-12 col-md-6 mb-3">
           <label for="user-apellidos" class="form-label">Apellidos:</label>
           <input id="user-apellidos" [(ngModel)]="user.last_name" class="form-control fs-4" placeholder="Apellidos" />
           <div *ngIf="formErrors['last_name']" class="text-danger mt-1">
