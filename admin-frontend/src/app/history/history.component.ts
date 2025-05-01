@@ -44,7 +44,7 @@ export class HistoryComponent implements OnInit {
     this.isLoading = true
     this.api.getHistory().subscribe({
       next: history_entries => {
-        this.history_entries = history_entries;
+        this.history_entries = history_entries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         this.filteredEntries = [...this.history_entries];
         this.isLoading = false;
       },
@@ -68,9 +68,14 @@ export class HistoryComponent implements OnInit {
         !this.statusFilter ||
         (this.statusFilter === 'permitido' && entry.allowed) ||
         (this.statusFilter === 'denegado' && !entry.allowed);
-
+  
       return dateValid && plateMatch && statusMatch;
     });
+  
+    // Ordenar por fecha descendente (más reciente primero)
+    this.filteredEntries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  
     this.currentPage = 1;
-  } 
+  }
+  
 }

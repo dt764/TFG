@@ -85,7 +85,7 @@ export class UserDetailComponent {
     this.isLoading = true;
     this.apiService.getUserHistory(id).subscribe({
       next: userHistory => {
-        this.userHistory = userHistory;
+        this.userHistory = userHistory.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());;
         this.filteredEntries = [...this.userHistory];
         this.isLoading = false;
       },
@@ -171,6 +171,9 @@ export class UserDetailComponent {
       const matchesPlate = !this.plate_input || entry.plate.toLowerCase().includes(this.plate_input.toLowerCase());
       return inDateRange && matchesPlate;
     });
+
+    this.filteredEntries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    
     this.currentPage = 1;
   }
 
