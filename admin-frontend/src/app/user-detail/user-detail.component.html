@@ -10,7 +10,7 @@
 </div>
 
 <!-- Mensaje de error -->
-<div *ngIf="errorMessage" class="alert alert-danger mt-3 fs-4">
+<div *ngIf="errorMessage && !user" class="alert alert-danger mt-3 fs-4">
   {{ errorMessage }}
 </div>
 
@@ -30,6 +30,10 @@
   <!-- Mensaje de éxito -->
   <div *ngIf="successMessage" class="alert alert-success mt-3">
     {{ successMessage }}
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger mt-3 fs-4">
+    {{ errorMessage }}
   </div>
 
   <!-- Sección de DATOS DEL USUARIO -->
@@ -108,6 +112,10 @@
       </select>
     </div>
 
+    <div *ngIf="userHistory.length < 1" class="text-center text-muted fs-4 p-3">
+      El usuario no tiene historial de entradas.
+    </div>
+
     <table *ngIf="filteredEntries.length > 0" class="table table-striped text-center">
       <thead>
         <tr>
@@ -134,7 +142,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">Confirmar eliminación</h5>
-          <button type="button" class="btn-close" aria-label="Close" (click)="confirmDelete = false"></button>
+          <button type="button" class="btn-close" aria-label="Close" [disabled]="requestIsLoading" (click)="confirmDelete = false"></button>
         </div>
         <div class="modal-body">
           <p class="fs-5">¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer.</p>
@@ -142,7 +150,7 @@
         <div class="modal-footer">
           <button type="button" class="btn fs-4" (click)="confirmDelete = false"
             style="border: solid 1px;">Cancelar</button>
-          <button type="button" class="btn btn-danger text-white fs-4" (click)="deleteUser()">Eliminar</button>
+          <button type="button" class="btn btn-danger text-white fs-4" [disabled]="requestIsLoading" (click)="deleteUser()">Eliminar</button>
         </div>
       </div>
     </div>

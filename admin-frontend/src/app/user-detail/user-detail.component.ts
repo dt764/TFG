@@ -32,7 +32,7 @@ export class UserDetailComponent {
   formErrors: UpdateUser_FormErrors = {}
   
   successMessage: string | null = null;
-  errorMessage: string | undefined;
+  errorMessage: string | null = null;
 
   confirmDelete = false;
 
@@ -47,6 +47,7 @@ export class UserDetailComponent {
   currentPage = 1;
   itemsPerPage = 10;
   pageSizeOptions = [5, 10, 25, 50];
+  requestIsLoading: boolean = false;
   
   constructor(
     private router: Router,
@@ -107,12 +108,13 @@ export class UserDetailComponent {
         last_name: this.user.last_name,
         plates: cleanedPlates
       };
-
+      this.requestIsLoading = true;
       this.apiService.updateUser(this.updateUser, this.user.id).subscribe({
         next: (user) => {
           this.user = user;
           this.formErrors = {}; // Limpiamos los errores cuando la actualización es exitosa
           this.successMessage = 'Datos guardados correctamente ✅';
+          this.requestIsLoading = false;
   
           // Borra el mensaje después de 3 segundos (opcional)
           setTimeout(() => {
@@ -123,6 +125,14 @@ export class UserDetailComponent {
           if (err.status === 400 && err.error.error) {
             this.formErrors = err.error.error;
           }
+          else {
+            this.errorMessage = 'No se pudieron guardar los datos. Inténtalo más tarde.';
+            setTimeout(() => {
+              this.errorMessage = null;
+            }, 3000);
+          }
+
+          this.requestIsLoading = false;
         }
       });
     }
@@ -130,11 +140,25 @@ export class UserDetailComponent {
 
   deleteUser() {
     if (this.user){
-      this.apiService.deleteUser(this.user.id).subscribe(() => {
-        this.messageService.showMessage("Usuario eliminado correctamente  ✅.");  // Enviar el mensaje
-        this.confirmDelete = false;
-        this.router.navigate(['/users']);
-      });
+      this.requestIsLoading = true;
+      this.apiService.deleteUser(this.user.id).subscribe({
+        next: () => {
+          this.messageService.showMessage("Usuario eliminado correctamente  ✅.");  // Enviar el mensaje
+          this.confirmDelete = false;
+          this.router.navigate(['/users']);
+          this.requestIsLoading = false;
+
+        },
+        error: () => {
+          this.confirmDelete = false;
+          this.errorMessage = 'No se pudo elminar el usuario. Inténtalo más tarde.';
+          this.requestIsLoading = false;
+
+          setTimeout(() => {
+            this.errorMessage = null;
+          }, 3000);
+        }
+      });   
     }
    
   }
