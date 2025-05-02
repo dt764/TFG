@@ -12,4 +12,4 @@ if __name__ == '__main__':
     if debug_mode:
         logging.basicConfig(level=logging.DEBUG)
     
-    app.run(debug=debug_mode)
+    app.run(host='0.0.0.0', debug=debug_mode)

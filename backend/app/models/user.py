@@ -1,6 +1,4 @@
 from ..extensions import db, bcrypt
-from sqlalchemy import event
-import os
 from typing import List
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .role import Role
@@ -33,21 +31,3 @@ class User(db.Model):
 
     def check_password(self, password):
         return bcrypt.check_password_hash(self.password_hash, password)
-
-@event.listens_for(User.__table__, 'after_create')
-def create_admin(*args, **kwargs):
-    admin_email = os.getenv('FLASK_ADMIN_EMAIL')
-    admin_firstname = os.getenv('FLASK_ADMIN_FIRSTNAME')
-    admin_lastname = os.getenv('FLASK_ADMIN_LASTNAME')
-    admin_password = os.getenv('FLASK_ADMIN_PASSWORD')
-    
-    admin_role = db.session.execute(db.select(Role).filter_by(name="admin")).scalar_one_or_none()
-    if admin_role:
-        db.session.add(User(
-            email=admin_email,
-            first_name=admin_firstname,
-            last_name=admin_lastname,
-            password=admin_password,
-            role_id=admin_role.id
-        ))
-        db.session.commit()

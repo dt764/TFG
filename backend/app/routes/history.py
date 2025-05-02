@@ -8,12 +8,13 @@ from ..schemas.history import verify_plate_request_schema, verify_plate_response
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from ..models.user import User
 
+import os
 
 history_bp = Blueprint('history', __name__)
 
 @history_bp.route('/history', methods=['GET'])
 @jwt_required()
-@role_required('admin')
+@role_required(os.getenv("FLASK_ADMIN_ROLE"))
 def get_history():
     history_records = db.session.execute(db.select(History)).scalars().all()
     return jsonify(histories_schema.dump(history_records)), 200

@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - ./backend/.env
+      - ./backend/.flaskenv
+    volumes:
+      - ./backend:/app
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./admin-frontend
+      dockerfile: Dockerfile
+    ports:
+      - "4200:80"
+    restart: unless-stopped
+
+  db:
+    container_name: db
+    image: postgres:15
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: scram-sha-256
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+      POSTGRES_USER: usuario
+      POSTGRES_PASSWORD: contraseña
+      POSTGRES_DB: db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    restart: always
+
+volumes:
+  postgres_data:

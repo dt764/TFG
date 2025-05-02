@@ -1,22 +1,43 @@
 from flask import Blueprint, jsonify, request
+import os
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from ..extensions import db
 from ..models.user import User
 from ..models.plate import Plate
+from ..models.role import Role
 from ..schemas.user import user_schema, users_schema, create_user_schema, update_user_schema
 from ..utils.auth_utils import role_required
 
 
 users_bp = Blueprint('users', __name__)
 
+user_role_name = os.getenv('FLASK_USER_ROLE')
+admin_role_name = os.getenv('FLASK_ADMIN_ROLE')
+
+def get_user_role_id():
+    # Get the user role ID from the database
+    # This function assumes that the user role is already present in the database
+    stmt = db.select(Role).where(Role.name == user_role_name)
+    user_role = db.session.execute(stmt).scalar()
+    return user_role.id
+
+def get_admin_role_id():
+    # Get the admin role ID from the database
+    # This function assumes that the admin role is already present in the database
+    stmt = db.select(Role).where(Role.name == admin_role_name)
+    admin_role = db.session.execute(stmt).scalar()
+    return admin_role.id
+    
+
 #---------------------------------#
 
 @users_bp.route('/users', methods=['GET'])
 @jwt_required()
-@role_required('admin')
+@role_required(admin_role_name)
 def get_users():
     # Select users where role_id is not 1 (admin)
-    stmt = db.select(User).where(User.role_id != 1)
+    user_role_id = get_user_role_id()
+    stmt = db.select(User).where(User.role_id == user_role_id)
     users = db.session.execute(stmt).scalars().all()
     return jsonify(users_schema.dump(users)), 200
 
@@ -24,7 +45,7 @@ def get_users():
 
 @users_bp.route('/users', methods=['POST'])
 @jwt_required()
-@role_required('admin')
+@role_required(admin_role_name)
 def create_user():
     json_data = request.get_json()
 
@@ -79,7 +100,7 @@ def create_user():
         first_name=data['first_name'],
         last_name=data['last_name'],
         password=data['password'],  # Recuerda hashear
-        role_id=2  # Rol de usuario normal
+        role_id=get_user_role_id() # Rol de usuario normal
     )
 
     # Asociar placas
@@ -101,7 +122,7 @@ def get_user(user_id):
     current_user_id = get_jwt_identity()
     current_user = db.session.get(User, current_user_id)
 
-    if current_user.role.name == "user" and current_user.id != user_id:
+    if current_user.role.name == user_role_name and current_user.id != user_id:
         return jsonify({"error": "Unauthorized"}), 403
 
     user = db.session.get(User, user_id)
@@ -114,7 +135,7 @@ def get_user(user_id):
 
 @users_bp.route('/users/<int:user_id>', methods=['PUT'], endpoint="update_user")
 @jwt_required()
-@role_required('admin')
+@role_required(admin_role_name)
 def update_user(user_id):
     json_data = request.get_json()
     update_user_schema.validate(json_data)
@@ -187,12 +208,12 @@ def update_user(user_id):
 
 @users_bp.route('/users/<int:user_id>', methods=['DELETE'], endpoint="delete_user")
 @jwt_required()
-@role_required('admin')
+@role_required(admin_role_name)
 def delete_user(user_id):
     user = db.session.get(User, user_id)
 
     # Check if the user is an admin
-    if user.role.name == "admin":
+    if user.role.name == admin_role_name:
         return jsonify({"error": "Cannot delete admin users"}), 403
 
     db.session.delete(user)

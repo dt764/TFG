@@ -1,0 +1,30 @@
+# Git and editor configs
+.git
+.gitignore
+.editorconfig
+
+# IDEs
+.vscode/
+.idea/
+
+# Node dependencies
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+package-lock.json*
+
+# Angular testing and docs
+e2e/
+docs/
+
+# Build output (esto depende de tu angular.json)
+dist/
+
+# Output artifacts
+*.zip
+*.tgz
+
+# Mac/Linux/Windows junk files
+.DS_Store
+Thumbs.db

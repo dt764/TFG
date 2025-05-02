@@ -1,17 +1,8 @@
-from flask import Flask
+from app import create_app
+from app.models.role import Role
+from app.models.user import User
+from app.extensions import db
 import os
-
-from .utils.error_handlers import register_jwt_error_handlers, register_error_handlers
-from .extensions import db, bcrypt, ma, jwt, cors, migrate
-from .routes.auth import auth_bp
-from .routes.users import users_bp
-from .routes.history import history_bp
-from .routes.plates import plates_bp
-from .utils.middleware import middleware
-
-from .models.role import Role
-from .models.user import User
-
 
 def create_roles():
     if not Role.query.filter_by(name=os.getenv("FLASK_ADMIN_ROLE")).first():
@@ -46,29 +37,8 @@ def create_admin():
             db.session.add(new_admin)
             db.session.commit()
 
-def create_app():
-    app = Flask(__name__)
-    app.config.from_prefixed_env()
-
-    # Initialize extensions
-    db.init_app(app)
-    migrate.init_app(app, db)
-    bcrypt.init_app(app)
-    ma.init_app(app)
-    jwt.init_app(app)
-    cors.init_app(app)
-
-    # Register JWT error handlers
-    register_jwt_error_handlers(jwt)
-
-    # Register error handlers
-    register_error_handlers(app)
-
-    # Register blueprints
-    app.register_blueprint(auth_bp)
-    app.register_blueprint(users_bp)
-    app.register_blueprint(history_bp)
-    app.register_blueprint(plates_bp)
-    app.register_blueprint(middleware)
-
-    return app
+if __name__ == "__main__":
+    app = create_app()
+    with app.app_context():
+        create_roles()  # Crea los roles si no existen
+        create_admin()  # Crea el admin si no existe

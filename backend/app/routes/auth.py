@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+import os
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, set_access_cookies, unset_jwt_cookies
 from ..models.user import User
 from ..models.role import Role
@@ -12,7 +13,7 @@ auth_bp = Blueprint('auth', __name__)
 def user_login():
     data = request.get_json()
     user = db.session.query(User).filter_by(email=data['email']).first()
-    user_role_id = db.session.query(Role).filter_by(name='user').first().id
+    user_role_id = db.session.query(Role).filter_by(name=os.getenv("FLASK_USER_ROLE")).first().id
 
     if user and user.check_password(data['password']):
         if user.role_id != user_role_id:
@@ -29,9 +30,7 @@ def user_login():
 def admin_login():
     data = request.get_json()
     user = db.session.query(User).filter_by(email=data['email']).first()
-    admin_role_id = db.session.query(Role).filter_by(name='admin').first().id
-
-    print(f"Admin Role ID: {admin_role_id}")
+    admin_role_id = db.session.query(Role).filter_by(name=os.getenv("FLASK_ADMIN_ROLE")).first().id
 
     if user and user.check_password(data['password']):
         if user.role_id != admin_role_id:
@@ -92,7 +91,7 @@ def check_user_session():
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    user_role = db.session.query(Role).filter_by(name='user').first()
+    user_role = db.session.query(Role).filter_by(name=os.getenv("FLASK_USER_ROLE")).first()
     if not user_role:
         return jsonify({"error": "User role not configured"}), 500
 
@@ -111,7 +110,7 @@ def check_admin_session():
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    admin_role = db.session.query(Role).filter_by(name='admin').first()
+    admin_role = db.session.query(Role).filter_by(name=os.getenv("FLASK_ADMIN_ROLE")).first()
     if not admin_role:
         return jsonify({"error": "Admin role not configured"}), 500
 
