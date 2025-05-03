@@ -12,6 +12,8 @@ from .utils.middleware import middleware
 from .models.role import Role
 from .models.user import User
 
+import logging
+
 
 def create_roles():
     if not Role.query.filter_by(name=os.getenv("FLASK_ADMIN_ROLE")).first():
@@ -70,5 +72,7 @@ def create_app():
     app.register_blueprint(history_bp)
     app.register_blueprint(plates_bp)
     app.register_blueprint(middleware)
+
+    logging.getLogger('flask_cors').level = logging.DEBUG
 
     return app
