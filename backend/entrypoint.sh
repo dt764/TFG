@@ -12,4 +12,4 @@ echo "Ejecutando init_app.py..."
 python init_app.py
 
 echo "Iniciando servidor Flask..."
-exec python run.py
+exec gunicorn -b 0.0.0.0:5000 run:app
