@@ -12,7 +12,13 @@ export class MessageService {
 
   showMessage(message: string): void {
     this.messageSource.next(message);
+  
+    // Borra el mensaje automáticamente después de 3 segundos
+    setTimeout(() => {
+      this.clear();
+    }, 3000);
   }
+  
 
   clear(): void {
     this.messageSource.next(null);
